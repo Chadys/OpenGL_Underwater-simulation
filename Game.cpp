@@ -21,6 +21,10 @@ void Game::Init()
 {
     //Adapt camera speed for 2D and depending on the screen size (it was originalled choosen for a 800x600 screen)
     this->Cam.MovementSpeed = 100.0f*this->Width/800;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dis(-50,50);
+    std::uniform_int_distribution<int> dis2(0,360);
 
     // Load shaders
     Shader shader = ResourceManager::LoadShader("./shaders/jeu.vs", "./shaders/jeu.fs", "./shaders/jeu.gs", "jeu");
@@ -52,10 +56,35 @@ void Game::Init()
     this->models.push_back(mod);
     mod = GameModel("models3D/phenix_nocullface/Model_C1018410/fenghuang5.obj", "phenix");
     mod.Size = glm::vec3(0.1);
-    mod.Position.y = 200.0f;
+    mod.Position.y = 250.0f;
     mod.outline = false;
     mod.cullface = false;
     this->models.push_back(mod);
+    mod = GameModel("models3D/hummingbird/hummingbird.obj", "hummingbird");
+    mod.Size = glm::vec3(0.01);
+    mod.Position = glm::vec3(50,150,-100);
+    mod.outline = false;
+    this->models.push_back(mod);
+    mod = GameModel("models3D/ray/something_01.obj", "ray");
+    mod.Rotation = glm::vec3(270, 50, 0);
+    mod.Size = glm::vec3(0.05);
+    mod.Position = glm::vec3(-20,20,-20);
+    this->models.push_back(mod);
+    for (char i = '0', max = '9'; i <= '1'; ++i, max='5') {
+        for (int j = '1'; j <= max; ++j) {
+            string filename("models3D/Tropical Fish Pack/TropicalFish"), name("fish");
+            filename+=i;
+            filename+=j;
+            filename+=".obj";
+            name+=i;
+            name+=j;
+            mod = GameModel(filename, name);
+            mod.Size = glm::vec3(0.02);
+            mod.Position = glm::vec3(dis(gen), dis(gen)+50, dis(gen));
+            mod.Rotation.y = dis2(gen);
+            this->models.push_back(mod);
+        }
+    }
 
     // Texts
     this->texts.push_back(Text("GAME OVER", glm::vec2(this->Width/2, this->Height/3), this->Width/1920*2, glm::vec4(1)));
@@ -147,7 +176,7 @@ void Game::Render()
 
     for (Square &s : squares)
         s.Draw(this->State_manager,*Renderer[0], projection2D, glm::mat4(), GL_TRUE);
-    objects[0].Draw(this->State_manager, *Renderer[1], glm::vec2(-this->Cam.Position.x, this->Cam.Position.z)/100.0f,projection3D, glm::mat4(glm::mat3(view3D)));
+//    objects[0].Draw(this->State_manager, *Renderer[1], glm::vec2(-this->Cam.Position.x, this->Cam.Position.z)/100.0f,projection3D, glm::mat4(glm::mat3(view3D)));
     for(int i = 1; i < this->objects.size(); i++)
         objects[i].Draw(this->State_manager, *Renderer[0], glm::vec2(0),projection3D, view3D);
     for(int i = 0; i < this->models.size(); i++) {

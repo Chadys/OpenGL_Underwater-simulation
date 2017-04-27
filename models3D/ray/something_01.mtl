@@ -1,0 +1,37 @@
+# Max2Mtl Version 4.0 Mar 10th, 2001
+#
+# Multi/Sub 15_-_Default (3) to come 
+#
+newmtl Material__40
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1
+Ns  0
+illum 2
+map_Kd -s 1.5 1.5 1 maps/rejnok_05.jpg
+bump maps/struktura_02.jpg
+#
+newmtl Material__33
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1
+Ns  0
+illum 2
+map_Kd -s 1.5 1.5 1 maps/rejnok_04.jpg
+bump -s 1.8 1.8 1 maps/rejnok_06.jpg
+#
+newmtl Material__41
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1
+Ns  0
+illum 2
+map_Kd -s 2 2 1 maps/rejnok_05.jpg
+bump -s 2 2 1 maps/struktura_02.jpg
+#
+# Multi/Sub 15_-_Default done 
+#
+# EOF
