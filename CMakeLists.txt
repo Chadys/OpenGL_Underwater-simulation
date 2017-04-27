@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.5)
+project(Under_the_sea)
+
+set(CMAKE_CXX_STANDARD 11)
+
+set(SOURCE_FILES main.cpp Camera.cpp Game.cpp Game_Object.cpp Model.cpp Mesh.cpp Resource_Manager.cpp Sprite_Renderer.cpp State_Manager.cpp Texture.cpp Shader.cpp Text.cpp Text_Renderer.cpp)
+add_executable(Under_the_sea ${SOURCE_FILES})
+find_package(PkgConfig REQUIRED)
+pkg_search_module(GLFW REQUIRED glfw3)
+include_directories(${GLFW_INCLUDE_DIRS})
+find_package(GLEW REQUIRED)
+find_package(Freetype REQUIRED)
+include_directories(${FREETYPE_INCLUDE_DIRS})
+find_package(OpenGL REQUIRED)
+target_link_libraries(Under_the_sea GLEW SOIL assimp ${OPENGL_gl_LIBRARY} ${GLFW_LIBRARIES} ${FREETYPE_LIBRARIES})
