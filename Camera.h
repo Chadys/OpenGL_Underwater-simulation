@@ -52,7 +52,6 @@ public:
     GLfloat MovementSpeed;
     GLfloat MouseSensitivity;
     GLfloat Zoom;
-    glm::vec3 Velocity;
 
     // Constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH);
@@ -69,7 +68,6 @@ public:
     void ProcessMouseScroll(GLfloat yoffset);
     static bool in_frustrum_square(glm::mat4 MVP);
     static bool in_frustrum_point(glm::mat4 MVP, glm::vec4 p);
-    void updatePos(GLfloat dt);
 
 private:
     // Calculates the front vector from the Camera's (updated) Eular Angles

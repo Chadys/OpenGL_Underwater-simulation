@@ -45,7 +45,7 @@ void Mesh::Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rot
     model = glm::scale(model, glm::vec3(size)); // Last scale
 
     // Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
-    shader.SetFloat("material.shininess", 16.0f);
+    shader.SetFloat("shininess", 16.0f);
     shader.SetFloat("alpha", alpha);
     shader.SetVector3f("modelColor", color);
     shader.SetMatrix4("projection", projection);

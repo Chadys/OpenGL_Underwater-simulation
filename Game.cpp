@@ -29,13 +29,16 @@ void Game::Init()
     // Load shaders
     Shader shader = ResourceManager::LoadShader("./shaders/jeu.vs", "./shaders/jeu.fs", "./shaders/jeu.gs", "jeu");
     ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox");
-    ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", nullptr, "model");
+    Shader mshader = ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", nullptr, "model");
     Shader tshader = ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text");
 
     // Configure shaders
-    this->State_manager.Active(shader);
-    shader.SetInteger("sprite", 0);
-    tshader.SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f));
+    shader.SetInteger("sprite", 0, true);
+    tshader.SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), true);
+    mshader.SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, true);
+    mshader.SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, true);
+    mshader.SetVector3f("dirLight.diffuse", 0.4f, 0.4f, 0.4f, true);
+    mshader.SetVector3f("dirLight.specular", 0.5f, 0.5f, 0.5f, true);
 
 
     // Load textures
@@ -101,17 +104,11 @@ void Game::Init()
 /*------------------------------------UPDATE-----------------------------------------*/
 void Game::Update(GLfloat dt)
 {
-    Shader shader = ResourceManager::GetShader("jeu");
+    Shader shader = ResourceManager::GetShader("jeu"), mshader = ResourceManager::GetShader("model");
 
     this->State_manager.Update(dt);
 
-//    this->Cam.updatePos(dt);
-    shader.SetVector3f("cam_pos", this->Cam.Position);
-    shader.SetVector3f("cam_up", this->Cam.Up);
-    shader.SetVector3f("cam_front", this->Cam.Front);
-    shader.SetVector3f("cam_right", this->Cam.Right);
-    this->Cam.Velocity = this->Cam.Front*250.0f;
-    this->Cam.Velocity.y = 0.0f;
+    shader.SetVector3f("viewPos", this->Cam.Position);
 }
 
 /*------------------------------------PROCESSORS-----------------------------------------*/

@@ -10,8 +10,6 @@ uniform mat4 projection;
 
 uniform vec2 deplace;
 
-mat4 billboard(mat4 mat);
-
 void main()
 {
     gl_Position = projection * view * model * vec4(position, 1.0f);
