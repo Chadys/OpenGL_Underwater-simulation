@@ -51,7 +51,7 @@ public:
 
     /*  Functions  */
     // Constructor
-    Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures);
+    Mesh(vector<Vertex> &vertices, vector<GLuint> &indices, vector<Texture> &textures);
 
     // Render the mesh
     void Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,

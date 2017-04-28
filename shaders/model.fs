@@ -6,7 +6,6 @@ in vec3 Normal;
 
 out vec4 fragcolor;
 
-uniform sampler2D texture_diffuse1;
 uniform float shininess;
 uniform bool back;
 uniform float alpha;
@@ -20,25 +19,43 @@ struct DirLight {
     vec3 diffuse;
     vec3 specular;
 };
+struct Material {
+    sampler2D texture_diffuse1;
+    sampler2D texture_specular1;
+    bool texture_specular;
+    sampler2D texture_height1;
+    bool texture_height;
+    sampler2D texture_normal1;
+    bool texture_normal;
+    sampler2D texture_opacity1;
+    bool texture_opacity;
+    float shininess;
+};
 uniform DirLight dirLight;
+uniform Material material;
 uniform vec3 viewPos;
+uniform mat3 transpose_inverse_model;
 
 // Function prototypes
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 hsv2rgb(vec3 c);
 
-void main()
-{
-    vec3 norm = normalize(Normal);
+void main(){
+    float alpha = alpha;
+    if (material.texture_opacity)
+        alpha = min(alpha, texture(material.texture_opacity1, TexCoords).r); // since opacity texture is a B&W image, we can take r, g or b
+	if(alpha<0.1)
+		discard;
+    vec3 norm;
+    if(material.texture_normal)
+        norm = normalize(transpose_inverse_model * texture(material.texture_normal1, TexCoords).rgb);
+    else
+        norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 	if(back)
 		fragcolor   = vec4(0,0,0,alpha);
-    else{
-        vec3 color = CalcDirLight(dirLight, norm, viewDir);
-    	fragcolor   = vec4(hsv2rgb(modelColor), alpha) * vec4(color, 1.0);
-    }
-	if(fragcolor.a<0.1)
-		discard;
+    else
+    	fragcolor   = vec4(hsv2rgb(modelColor), alpha) * vec4(CalcDirLight(dirLight, norm, viewDir), alpha);
 	fragcolor *= fade;
 }
 
@@ -60,8 +77,10 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     // Combine results
-    vec3 ambient = light.ambient * vec3(texture(texture_diffuse1, TexCoords));
-    vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse1, TexCoords));
+    vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, TexCoords));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.texture_diffuse1, TexCoords));
     vec3 specular = light.specular * spec;
+    if(material.texture_specular)
+        specular*=vec3(texture(material.texture_specular1, TexCoords));
     return (ambient + diffuse + specular);
 }

@@ -29,6 +29,17 @@ void Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm:
 {
     manager.tex2D = NO_TEX;
     manager.Active(shader);
+
+    // Prepare transformations
+    glm::mat4 model;
+    model = glm::translate(model, glm::vec3(position));  // First translate (transformations are: scale happens first, then rotation and then final translation happens; reversed order)
+    model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f,0.0f,0.0f)); // Then rotate
+    model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f,1.0f,0.0f));
+    model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f,0.0f,1.0f));
+    model = glm::scale(model, glm::vec3(size)); // Last scale
+    shader.SetMatrix4("model", model);
+    shader.SetMatrix3("transpose_inverse_model", glm::mat3(glm::transpose(glm::inverse(model))));
+
     for(GLuint i = 0; i < this->meshes.size(); i++)
         this->meshes[i].Draw(shader, position, size, rotation, color, alpha, outline, projection, view);
 }
@@ -123,11 +134,23 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     // Specular: texture_specularN
     // Normal: texture_normalN
     // 1. Diffuse maps
+    for (int k = aiTextureType_NONE; k <= aiTextureType_UNKNOWN ; k++) {
+        std::cout << k << ' ' << material->GetTextureCount((aiTextureType)k) << std::endl;
+    }
     vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
     // 2. Specular maps
     vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    // 3. Normal maps
+    vector<Texture> heightMaps = this->loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height");
+    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    // 4. Normal maps
+    vector<Texture> normalMaps = this->loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
+    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    // 5. Opacity maps
+    vector<Texture> normalMaps = this->loadMaterialTextures(material, aiTextureType_OPACITY, "texture_normal");
+    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     // }
 
     // Return a mesh object created from the extracted mesh data

@@ -4,7 +4,7 @@
 
 #include "Mesh.h"
 
-Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures){
+Mesh::Mesh(vector<Vertex> &vertices, vector<GLuint> &indices, vector<Texture> &textures){
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
@@ -18,6 +18,10 @@ void Mesh::Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rot
     // Bind appropriate textures
     GLuint diffuseNr = 1;
     GLuint specularNr = 1;
+    GLuint normalNr = 1;
+    GLuint heightNr = 1;
+    GLuint opacityNr = 1;
+    vector<string> reset_tex;
     for(GLuint i = 0; i < this->textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i); // Active proper texture unit before binding
@@ -28,21 +32,22 @@ void Mesh::Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rot
         if(name == "texture_diffuse")
             ss << diffuseNr++; // Transfer GLuint to stream
         else if(name == "texture_specular")
-            ss << specularNr++; // Transfer GLuint to stream
+            ss << specularNr++;
+        else if(name == "texture_normal")
+            ss << normalNr++;
+        else if(name == "texture_height")
+            ss << heightNr++;
+        else if(name == "texture_opacity")
+            ss << opacityNr++;
         number = ss.str();
         // Now set the sampler to the correct texture unit
-        shader.SetInteger((name + number).c_str(), i);
+        reset_tex.push_back("material."+name);
+        shader.SetInteger((reset_tex.back() + number).c_str(), i);
+        shader.SetInteger(reset_tex.back().c_str(), GL_TRUE);
         // And finally bind the texture
         this->textures[i].tex.Bind();
     }
 
-    // Prepare transformations
-    glm::mat4 model;
-    model = glm::translate(model, glm::vec3(position));  // First translate (transformations are: scale happens first, then rotation and then final translation happens; reversed order)
-    model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f,0.0f,0.0f)); // Then rotate
-    model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f,1.0f,0.0f));
-    model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f,0.0f,1.0f));
-    model = glm::scale(model, glm::vec3(size)); // Last scale
 
     // Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
     shader.SetFloat("shininess", 16.0f);
@@ -50,7 +55,6 @@ void Mesh::Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rot
     shader.SetVector3f("modelColor", color);
     shader.SetMatrix4("projection", projection);
     shader.SetMatrix4("view", view);
-    shader.SetMatrix4("model", model);
     // Draw mesh
     glBindVertexArray(this->VAO);
     shader.SetInteger("back", GL_FALSE);
@@ -72,6 +76,8 @@ void Mesh::Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rot
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    for (const string &tex_bool : reset_tex)
+        shader.SetInteger(tex_bool.c_str(), GL_FALSE);
 }
 
 void Mesh::setupMesh(){
@@ -86,7 +92,7 @@ void Mesh::setupMesh(){
     // A great thing about structs is that their memory layout is sequential for all its items.
     // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
     // again translates to 3/2 floats which translates to a byte array.
-    glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), &this->vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), this->vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint), &this->indices[0], GL_STATIC_DRAW);

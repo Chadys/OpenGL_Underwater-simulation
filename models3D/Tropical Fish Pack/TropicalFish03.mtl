@@ -14,3 +14,4 @@ newmtl 03___Default
 	Ke 0.0000 0.0000 0.0000
 	map_Ka TropicalFish03.jpg
 	map_Kd TropicalFish03.jpg
+	map_kn NormalMaps/TropicalFish03_NormalMap.jpg

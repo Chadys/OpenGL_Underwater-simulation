@@ -35,7 +35,7 @@ void Game::Init()
     // Configure shaders
     shader.SetInteger("sprite", 0, true);
     tshader.SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), true);
-    mshader.SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, true);
+    mshader.SetVector3f("dirLight.direction", 0.0f, -1.0f, 0.0f, true);
     mshader.SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, true);
     mshader.SetVector3f("dirLight.diffuse", 0.4f, 0.4f, 0.4f, true);
     mshader.SetVector3f("dirLight.specular", 0.5f, 0.5f, 0.5f, true);
@@ -109,6 +109,7 @@ void Game::Update(GLfloat dt)
     this->State_manager.Update(dt);
 
     shader.SetVector3f("viewPos", this->Cam.Position);
+    mshader.SetVector3f("viewPos", this->Cam.Position);
 }
 
 /*------------------------------------PROCESSORS-----------------------------------------*/

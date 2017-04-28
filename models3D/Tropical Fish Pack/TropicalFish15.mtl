@@ -14,3 +14,4 @@ newmtl 15___Default
 	Ke 0.0000 0.0000 0.0000
 	map_Ka TropicalFish15.jpg
 	map_Kd TropicalFish15.jpg
+	map_kn NormalMaps/TropicalFish15_NormalMap.jpg
