@@ -77,6 +77,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     vector<Vertex> vertices;
     vector<GLuint> indices;
     vector<Texture> textures;
+    // Process materials
+    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     // Walk through each of the mesh's vertices
     for(GLuint i = 0; i < mesh->mNumVertices; i++)
     {
@@ -92,6 +94,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
         vertex.Normal = vector;
+        if (material->GetTextureCount(aiTextureType_NORMALS)) {
+            // Tangents
+            vector.x = mesh->mTangents[i].x;
+            vector.y = mesh->mTangents[i].y;
+            vector.z = mesh->mTangents[i].z;
+            vertex.Tangent = vector;
+        }
         // Texture Coordinates
         if(mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
         {
@@ -123,10 +132,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         for(GLuint j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
-    // Process materials
-    // if(mesh->mMaterialIndex >= 0)
-    // {
-    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     // We assume a convention for sampler names in the shaders. Each diffuse texture should be named
     // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
     // Same applies to other texture as the following list summarizes:
@@ -134,9 +139,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     // Specular: texture_specularN
     // Normal: texture_normalN
     // 1. Diffuse maps
-    for (int k = aiTextureType_NONE; k <= aiTextureType_UNKNOWN ; k++) {
-        std::cout << k << ' ' << material->GetTextureCount((aiTextureType)k) << std::endl;
-    }
     vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
     // 2. Specular maps
@@ -149,8 +151,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     vector<Texture> normalMaps = this->loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     // 5. Opacity maps
-    vector<Texture> normalMaps = this->loadMaterialTextures(material, aiTextureType_OPACITY, "texture_normal");
-    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    vector<Texture> opacityMaps = this->loadMaterialTextures(material, aiTextureType_OPACITY, "texture_opacity");
+    textures.insert(textures.end(), opacityMaps.begin(), opacityMaps.end());
     // }
 
     // Return a mesh object created from the extracted mesh data

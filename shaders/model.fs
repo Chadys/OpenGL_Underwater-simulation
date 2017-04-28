@@ -3,6 +3,7 @@
 in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
+in mat3 TBN;
 
 out vec4 fragcolor;
 
@@ -47,8 +48,11 @@ void main(){
 	if(alpha<0.1)
 		discard;
     vec3 norm;
-    if(material.texture_normal)
-        norm = normalize(transpose_inverse_model * texture(material.texture_normal1, TexCoords).rgb);
+    if(material.texture_normal){
+        norm = texture(material.texture_normal1, TexCoords).rgb;
+        norm = normalize(norm);
+        norm = normalize(TBN * norm);
+    }
     else
         norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
