@@ -35,7 +35,6 @@ struct Material {
 uniform DirLight dirLight;
 uniform Material material;
 uniform vec3 viewPos;
-uniform mat3 transpose_inverse_model;
 
 // Function prototypes
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
@@ -54,12 +53,14 @@ void main(){
         norm = normalize(TBN * norm);
     }
     else
-        norm = normalize(Normal);
+        norm = Normal;
     vec3 viewDir = normalize(viewPos - FragPos);
 	if(back)
 		fragcolor   = vec4(0,0,0,alpha);
     else
     	fragcolor   = vec4(hsv2rgb(modelColor), alpha) * vec4(CalcDirLight(dirLight, norm, viewDir), alpha);
+    if(!gl_FrontFacing)
+        fragcolor.xyz *= vec3(0.3);
 	fragcolor *= fade;
 }
 
@@ -78,8 +79,8 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // Specular shading
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
     // Combine results
     vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(material.texture_diffuse1, TexCoords));

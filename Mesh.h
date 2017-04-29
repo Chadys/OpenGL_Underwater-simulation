@@ -56,8 +56,7 @@ public:
     Mesh(vector<Vertex> &vertices, vector<GLuint> &indices, vector<Texture> &textures);
 
     // Render the mesh
-    void Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
-              glm::vec3 color, GLfloat alpha, bool outline, glm::mat4 projection, glm::mat4 view);
+    void Draw(Shader shader, bool outline);
 
 private:
     /*  Render data  */

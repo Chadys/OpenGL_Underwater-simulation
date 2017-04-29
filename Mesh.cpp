@@ -13,8 +13,7 @@ Mesh::Mesh(vector<Vertex> &vertices, vector<GLuint> &indices, vector<Texture> &t
     this->setupMesh();
 }
 
-void Mesh::Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
-                glm::vec3 color, GLfloat alpha, bool outline, glm::mat4 projection, glm::mat4 view){
+void Mesh::Draw(Shader shader, bool outline){
     // Bind appropriate textures
     GLuint diffuseNr = 1;
     GLuint specularNr = 1;
@@ -50,11 +49,7 @@ void Mesh::Draw(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rot
 
 
     // Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
-    shader.SetFloat("shininess", 16.0f);
-    shader.SetFloat("alpha", alpha);
-    shader.SetVector3f("modelColor", color);
-    shader.SetMatrix4("projection", projection);
-    shader.SetMatrix4("view", view);
+    shader.SetFloat("shininess", 8.0f);
     // Draw mesh
     glBindVertexArray(this->VAO);
     shader.SetInteger("back", GL_FALSE);

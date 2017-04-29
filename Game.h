@@ -49,6 +49,7 @@ private:
     Camera                   Cam;
     GLfloat                  lastX, lastY;
     GLboolean                firstMouse;
+    GLboolean                DEBUG;
     vector<Sprite_Renderer*> Renderer;
     Text_Renderer            *T_Renderer;
     vector<Object3D>         objects;

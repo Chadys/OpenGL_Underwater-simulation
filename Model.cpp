@@ -38,10 +38,14 @@ void Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm:
     model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f,0.0f,1.0f));
     model = glm::scale(model, glm::vec3(size)); // Last scale
     shader.SetMatrix4("model", model);
-    shader.SetMatrix3("transpose_inverse_model", glm::mat3(glm::transpose(glm::inverse(model))));
+    shader.SetMatrix3("transpose_inverse_viewmodel", glm::mat3(glm::transpose(glm::inverse(view * model))));
+    shader.SetFloat("alpha", alpha);
+    shader.SetVector3f("modelColor", color);
+    shader.SetMatrix4("projection", projection);
+    shader.SetMatrix4("view", view);
 
     for(GLuint i = 0; i < this->meshes.size(); i++)
-        this->meshes[i].Draw(shader, position, size, rotation, color, alpha, outline, projection, view);
+        this->meshes[i].Draw(shader, outline);
 }
 
 

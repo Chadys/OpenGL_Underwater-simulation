@@ -7,7 +7,7 @@
 
 /*------------------------------------CONSTRUCTOR/DESTRUCTOR-----------------------------------------*/
 Game::Game()
-        : Keys(), ProcessedKeys(), Cam(glm::vec3(0.0f, 0.0f, 0.0f)), lastX(0), lastY(0), firstMouse(GL_TRUE) {}
+        : Keys(), ProcessedKeys(), Cam(glm::vec3(0.0f, 0.0f, 0.0f)), lastX(0), lastY(0), firstMouse(GL_TRUE), DEBUG(GL_FALSE) {}
 
 Game::~Game()
 {
@@ -31,6 +31,7 @@ void Game::Init()
     ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox");
     Shader mshader = ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", nullptr, "model");
     Shader tshader = ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text");
+    ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug");
 
     // Configure shaders
     shader.SetInteger("sprite", 0, true);
@@ -127,12 +128,16 @@ void Game::ProcessInput(GLfloat dt)
         this->Cam.ProcessKeyboard(RIGHT, dt);
     if(this->Keys[GLFW_KEY_W])
         this->Cam.ProcessKeyboard(FORWARD, dt);
-    // Dino rotation and color
     if(this->Keys[GLFW_KEY_KP_ADD] && !this->ProcessedKeys[GLFW_KEY_KP_ADD]){
         this->ProcessedKeys[GLFW_KEY_KP_ADD] = GL_TRUE;
     }
     if(this->Keys[GLFW_KEY_KP_SUBTRACT] && !this->ProcessedKeys[GLFW_KEY_KP_SUBTRACT]){
         this->ProcessedKeys[GLFW_KEY_KP_SUBTRACT] = GL_TRUE;
+    }
+    //DEBUG
+    if(this->Keys[GLFW_KEY_G] && !this->ProcessedKeys[GLFW_KEY_G]){
+        this->ProcessedKeys[GLFW_KEY_G] = GL_TRUE;
+        this->DEBUG = !this->DEBUG;
     }
     // Turbo
     if(this->Keys[GLFW_KEY_SPACE] && !this->ProcessedKeys[GLFW_KEY_SPACE]){
@@ -181,6 +186,8 @@ void Game::Render()
         if(!models[i].cullface)
             glDisable(GL_CULL_FACE);
         models[i].Draw(this->State_manager, ResourceManager::GetShader("model"), projection3D, view3D);
+        if(this->DEBUG)
+            models[i].Draw(this->State_manager, ResourceManager::GetShader("debug"), projection3D, view3D);
         if(!models[i].cullface)
             glEnable(GL_CULL_FACE);
     }

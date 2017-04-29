@@ -10,7 +10,7 @@ out vec3 FragPos;
 out mat3 TBN;
 
 uniform mat4 model;
-uniform mat3 transpose_inverse_model;
+uniform mat3 transpose_inverse_viewmodel;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -42,11 +42,11 @@ void main()
             // TBN must form a right handed coord system.
             // Some models have symetric UVs. Check and fix.
             if (dot(cross(N, T), B) < 0.0)
-                T = T * -1.0;
+                T = -T;
             TBN = mat3(T, B, N);
             Normal = normal;
     }
     else
-        Normal = transpose_inverse_model * normal;
+        Normal = normalize(vec3(vec4(transpose_inverse_viewmodel * normal, 1.0)));
     TexCoords = texCoords;
 }

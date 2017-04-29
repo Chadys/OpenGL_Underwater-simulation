@@ -16,7 +16,8 @@ enum Active_Shader {
     WORLD,
     SKYBOX,
     MODEL,
-    TEXT
+    TEXT,
+    DEBUG
 };
 
 // The different texture possible
