@@ -97,13 +97,14 @@ class GameModel : public Game_Object3D
 public:
     // Object state
     Model       model;
-    bool        outline;
-    bool        cullface;
+    bool        outline, cullface;
+    GLfloat     whirlpooling, speed, starting_height;
+    glm::vec3   centerpoint;
     // Constructor(s)
     GameModel(std::string file, std::string name);
     // Draw sprite
     void Draw(State_Manager &manager, Shader shader, glm::mat4 projection, glm::mat4 view);
-    void Update(GLfloat dt, GLfloat spin);
+    void Update(GLfloat dt);
     // Set model's position correctly :
     // the given side of the model will be localised as to be at pos location if it is facing the orientation side_local
     // Putting the model in its correct orientation for it to work will need to be done elsewhere.

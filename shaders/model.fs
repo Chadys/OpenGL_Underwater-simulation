@@ -49,7 +49,7 @@ void main(){
     vec3 norm;
     if(material.texture_normal){
         norm = texture(material.texture_normal1, TexCoords).rgb;
-        norm = normalize(norm);
+        norm = normalize(norm * 2.0 - 1.0);
         norm = normalize(TBN * norm);
     }
     else
@@ -59,8 +59,6 @@ void main(){
 		fragcolor   = vec4(0,0,0,alpha);
     else
     	fragcolor   = vec4(hsv2rgb(modelColor), alpha) * vec4(CalcDirLight(dirLight, norm, viewDir), alpha);
-    if(!gl_FrontFacing)
-        fragcolor.xyz *= vec3(0.3);
 	fragcolor *= fade;
 }
 

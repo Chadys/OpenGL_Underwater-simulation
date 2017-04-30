@@ -25,13 +25,18 @@ Model::Model()
         : Span_lrf(0), Span_udb(0) { }
 // Draws the model, and thus all its meshes
 void Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
-                 glm::vec3 color, GLfloat alpha, bool outline, glm::mat4 projection, glm::mat4 view)
+                 glm::vec3 color, GLfloat alpha, bool outline, GLfloat whirlpooling, glm::vec3 centerpoint,
+                 glm::mat4 projection, glm::mat4 view)
 {
     manager.tex2D = NO_TEX;
     manager.Active(shader);
 
     // Prepare transformations
     glm::mat4 model;
+    model = glm::translate(model, glm::vec3(centerpoint));
+    model = glm::rotate(model, glm::radians(whirlpooling), glm::vec3(0.0f,1.0f,0.0f));
+    model = glm::translate(model, glm::vec3(-centerpoint));
+
     model = glm::translate(model, glm::vec3(position));  // First translate (transformations are: scale happens first, then rotation and then final translation happens; reversed order)
     model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f,0.0f,0.0f)); // Then rotate
     model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f,1.0f,0.0f));
@@ -61,8 +66,7 @@ vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optim
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
     // Process each mesh located at the current node
-    for(GLuint i = 0; i < node->mNumMeshes; i++)
-    {
+    for(GLuint i = 0; i < node->mNumMeshes; i++) {
         // The node object only contains indices to index the actual objects in the scene.
         // The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];

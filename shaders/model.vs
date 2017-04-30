@@ -33,18 +33,16 @@ void main()
     gl_Position = projection * view * model * vec4(position, 1.0f);
     FragPos = vec3(model * vec4(position, 1.0f));
     if(material.texture_normal){
-            vec3 T = normalize(vec3(model * vec4(tangent, 0.0)));
-            vec3 N = normalize(vec3(model * vec4(normal, 0.0)));
-            // re-orthogonalize T with respect to N
-            T = normalize(T - dot(T, N) * N);
-            // then retrieve perpendicular vector B with the cross product of T and N
-            vec3 B = cross(N, T);
-            // TBN must form a right handed coord system.
-            // Some models have symetric UVs. Check and fix.
-            if (dot(cross(N, T), B) < 0.0)
-                T = -T;
-            TBN = mat3(T, B, N);
-            Normal = normal;
+        vec3 T = normalize(vec3(model * vec4(tangent,   0.0)));
+        vec3 N = normalize(vec3(model * vec4(normal,    0.0)));
+        // re-orthogonalize T with respect to N
+        T = normalize(T - dot(T, N) * N);
+        vec3 B = cross(N, T);
+        // TBN must form a right handed coord system.
+        // Some models have symetric UVs. Check and fix.
+        if (dot(cross(N, T), B) < 0.0)
+            T = -T;
+        TBN = mat3(T, B, N);
     }
     else
         Normal = normalize(vec3(vec4(transpose_inverse_viewmodel * normal, 1.0)));

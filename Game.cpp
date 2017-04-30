@@ -23,8 +23,9 @@ void Game::Init()
     this->Cam.MovementSpeed = 100.0f*this->Width/800;
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dis(-50,50);
-    std::uniform_int_distribution<int> dis2(0,360);
+    std::uniform_int_distribution<int> dis(10,80);
+    std::uniform_int_distribution<int> dis2(0,1);
+    std::uniform_int_distribution<int> dis3(10,150);
 
     // Load shaders
     Shader shader = ResourceManager::LoadShader("./shaders/jeu.vs", "./shaders/jeu.fs", "./shaders/jeu.gs", "jeu");
@@ -54,25 +55,35 @@ void Game::Init()
 
     // Models
     GameModel mod = GameModel("models3D/shark/Model_D0202004/wshark.obj", "shark");
-    mod.Rotation.y = 180;
+    mod.Rotation.y = 270;
     mod.Size = glm::vec3(0.005);
     mod.Position = glm::vec3(50,0,-50);
+    mod.centerpoint = glm::vec3(100, 0, 100);
+    mod.speed = 80;
     this->models.push_back(mod);
     mod = GameModel("models3D/phenix_nocullface/Model_C1018410/fenghuang5.obj", "phenix");
     mod.Size = glm::vec3(0.1);
-    mod.Position.y = 250.0f;
+    mod.centerpoint = glm::vec3(50, 250, 0);
+    mod.starting_height = 250;
     mod.outline = false;
     mod.cullface = false;
     this->models.push_back(mod);
     mod = GameModel("models3D/hummingbird/hummingbird.obj", "hummingbird");
     mod.Size = glm::vec3(0.01);
-    mod.Position = glm::vec3(50,150,-100);
+    mod.Position = glm::vec3(50,150,-20);
+    mod.starting_height = 150;
+    mod.centerpoint = glm::vec3(50,150,-140);
+    mod.speed = -60;
+    mod.Rotation.y = -90;
     mod.outline = false;
     this->models.push_back(mod);
     mod = GameModel("models3D/ray/something_01.obj", "ray");
-    mod.Rotation = glm::vec3(270, 50, 0);
+    mod.Rotation = glm::vec3(290, 30, -30);
     mod.Size = glm::vec3(0.05);
     mod.Position = glm::vec3(-20,20,-20);
+    mod.starting_height = 20;
+    mod.centerpoint = glm::vec3(0,20,-20);
+    mod.speed = -30;
     this->models.push_back(mod);
     for (char i = '0', max = '9'; i <= '1'; ++i, max='5') {
         for (int j = '1'; j <= max; ++j) {
@@ -84,8 +95,17 @@ void Game::Init()
             name+=j;
             mod = GameModel(filename, name);
             mod.Size = glm::vec3(0.02);
-            mod.Position = glm::vec3(dis(gen), dis(gen)+50, dis(gen));
-            mod.Rotation.y = dis2(gen);
+            mod.Position = glm::vec3(0, 0, dis(gen));
+            mod.starting_height = dis(gen);
+            mod.centerpoint = mod.Position;
+            mod.speed = dis3(gen);
+            mod.centerpoint.z += -30;
+            if(dis2(gen)){
+                mod.Rotation.y = -90;
+                mod.speed = -mod.speed;
+            }
+            else
+                mod.Rotation.y = 90;
             this->models.push_back(mod);
         }
     }
@@ -111,6 +131,10 @@ void Game::Update(GLfloat dt)
 
     shader.SetVector3f("viewPos", this->Cam.Position);
     mshader.SetVector3f("viewPos", this->Cam.Position);
+
+    for (GameModel &mod : this->models){
+        mod.Update(dt);
+    }
 }
 
 /*------------------------------------PROCESSORS-----------------------------------------*/

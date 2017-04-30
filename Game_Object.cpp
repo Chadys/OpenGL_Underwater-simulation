@@ -30,22 +30,18 @@ void Object3D::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::vec2
 
 GameModel::GameModel(std::string file, std::string name)
         : Game_Object3D(glm::vec3(0), glm::vec3(1), glm::vec3(0.0f,0.0f,1.0f)), // The color here is stocked in HSV format
-        outline(true), cullface(true){
+        outline(true), cullface(true), whirlpooling(0), speed(50), centerpoint(0), starting_height(0) {
     this->model = ResourceManager::LoadModel(file, name);
 }
 
 void GameModel::Draw(State_Manager &manager, Shader shader, glm::mat4 projection, glm::mat4 view){
-    this->model.Draw(manager, shader, this->Position, this->Size, this->Rotation, this->Color, this->Alpha, this->outline, projection, view);
+    this->model.Draw(manager, shader, this->Position, this->Size, this->Rotation, this->Color, this->Alpha,
+                     this->outline, this->whirlpooling, this->centerpoint, projection, view);
 }
 
-void GameModel::Update(GLfloat dt, GLfloat spin){
-    this->Rotation.x += dt * spin;
-    this->Color.x += dt; //change the Hue
-    if (this->Color.x > 1)
-        this->Color.x -= floor(this->Color.x);
-
-    GLfloat max = spin > 1000 ? 1000 : spin;
-    this->Color.y = max/1000;//change the saturation
+void GameModel::Update(GLfloat dt){
+    this->whirlpooling += dt*this->speed;
+    this->Position.y = this->starting_height+(glm::sin(0.2f*this->whirlpooling)*glm::pi<float>());
 }
 
 // Set the model in the correct position depending on its bounds so that the specified side of it is at the pos coordinate
