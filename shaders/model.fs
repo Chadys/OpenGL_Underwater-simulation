@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec2 TexCoords;
+in vec2 TexCoord;
 in vec3 FragPos;
 in vec3 Normal;
 in mat3 TBN;
@@ -43,12 +43,12 @@ vec3 hsv2rgb(vec3 c);
 void main(){
     float alpha = alpha;
     if (material.texture_opacity)
-        alpha = min(alpha, texture(material.texture_opacity1, TexCoords).r); // since opacity texture is a B&W image, we can take r, g or b
+        alpha = min(alpha, texture(material.texture_opacity1, TexCoord).r); // since opacity texture is a B&W image, we can take r, g or b
 	if(alpha<0.1)
 		discard;
     vec3 norm;
     if(material.texture_normal){
-        norm = texture(material.texture_normal1, TexCoords).rgb;
+        norm = texture(material.texture_normal1, TexCoord).rgb;
         norm = normalize(norm * 2.0 - 1.0);
         norm = normalize(TBN * norm);
     }
@@ -80,10 +80,10 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 halfwayDir = normalize(lightDir + viewDir);
     float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
     // Combine results
-    vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, TexCoords));
-    vec3 diffuse = light.diffuse * diff * vec3(texture(material.texture_diffuse1, TexCoords));
+    vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, TexCoord));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.texture_diffuse1, TexCoord));
     vec3 specular = light.specular * spec;
     if(material.texture_specular)
-        specular*=vec3(texture(material.texture_specular1, TexCoords));
+        specular*=vec3(texture(material.texture_specular1, TexCoord));
     return (ambient + diffuse + specular);
 }

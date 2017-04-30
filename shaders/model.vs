@@ -4,10 +4,10 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 tangent;
 layout (location = 3) in vec2 texCoords;
 
-out vec2 TexCoords;
-out vec3 Normal;
-out vec3 FragPos;
-out mat3 TBN;
+out vec2 all_TexCoord;
+out vec3 all_Normal;
+out vec3 all_FragPos;
+out mat3 all_TBN;
 
 uniform mat4 model;
 uniform mat3 transpose_inverse_viewmodel;
@@ -31,7 +31,7 @@ uniform Material material;
 void main()
 {
     gl_Position = projection * view * model * vec4(position, 1.0f);
-    FragPos = vec3(model * vec4(position, 1.0f));
+    all_FragPos = vec3(model * vec4(position, 1.0f));
     if(material.texture_normal){
         vec3 T = normalize(vec3(model * vec4(tangent,   0.0)));
         vec3 N = normalize(vec3(model * vec4(normal,    0.0)));
@@ -42,9 +42,9 @@ void main()
         // Some models have symetric UVs. Check and fix.
         if (dot(cross(N, T), B) < 0.0)
             T = -T;
-        TBN = mat3(T, B, N);
+        all_TBN = mat3(T, B, N);
     }
     else
-        Normal = normalize(vec3(vec4(transpose_inverse_viewmodel * normal, 1.0)));
-    TexCoords = texCoords;
+        all_Normal = normalize(vec3(vec4(transpose_inverse_viewmodel * normal, 1.0)));
+    all_TexCoord = texCoords;
 }

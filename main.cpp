@@ -93,14 +93,13 @@ int main (int argc, char *argv[])
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        //printf("%f\n", deltaTime);
         glfwPollEvents();
 
         // Manage user input
         game.ProcessInput(deltaTime);
 
         // Update Game state
-        game.Update(deltaTime);
+        game.Update(deltaTime, currentFrame);
 
         // Render
         //glClearColor(0.4f, 0.0f, 0.8f, 1.0f);

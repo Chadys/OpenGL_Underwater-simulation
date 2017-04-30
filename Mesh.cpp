@@ -54,18 +54,16 @@ void Mesh::Draw(Shader shader, bool outline){
     glBindVertexArray(this->VAO);
     shader.SetInteger("back", GL_FALSE);
     glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
-    if(outline) {
-        //Back face for contouring
-        shader.SetInteger("back", GL_TRUE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glCullFace(GL_FRONT);
-        glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
-    }
+//    if(outline) {
+//        //Back face for contouring
+//        shader.SetInteger("back", GL_TRUE);
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//        glCullFace(GL_FRONT);
+//        glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//        glCullFace(GL_BACK);
+//    }
     glBindVertexArray(0);
-
-    // Always good practice to set everything back to defaults once configured.
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glCullFace(GL_BACK);
     for (GLuint i = 0; i < this->textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);

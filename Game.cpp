@@ -25,12 +25,12 @@ void Game::Init()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> dis(10,80);
     std::uniform_int_distribution<int> dis2(0,1);
-    std::uniform_int_distribution<int> dis3(10,150);
+    std::uniform_int_distribution<int> dis3(10,100);
 
     // Load shaders
     Shader shader = ResourceManager::LoadShader("./shaders/jeu.vs", "./shaders/jeu.fs", "./shaders/jeu.gs", "jeu");
     ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox");
-    Shader mshader = ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", nullptr, "model");
+    Shader mshader = ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "shaders/model.gs", "model");
     Shader tshader = ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text");
     ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug");
 
@@ -39,8 +39,8 @@ void Game::Init()
     tshader.SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), true);
     mshader.SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, true);
     mshader.SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, true);
-    mshader.SetVector3f("dirLight.diffuse", 0.4f, 0.4f, 0.4f, true);
-    mshader.SetVector3f("dirLight.specular", 0.5f, 0.5f, 0.5f, true);
+    mshader.SetVector3f("dirLight.diffuse", 0.3f, 0.4f, 0.5f, true);
+    mshader.SetVector3f("dirLight.specular", 0.4f, 0.5f, 0.7f, true);
 
 
     // Load textures
@@ -123,14 +123,14 @@ void Game::Init()
 }
 
 /*------------------------------------UPDATE-----------------------------------------*/
-void Game::Update(GLfloat dt)
+void Game::Update(GLfloat dt, GLfloat currenttime)
 {
-    Shader shader = ResourceManager::GetShader("jeu"), mshader = ResourceManager::GetShader("model");
+    Shader mshader = ResourceManager::GetShader("model");
 
     this->State_manager.Update(dt);
-
-    shader.SetVector3f("viewPos", this->Cam.Position);
+    this->State_manager.Active(mshader);
     mshader.SetVector3f("viewPos", this->Cam.Position);
+    mshader.SetFloat("time", currenttime);
 
     for (GameModel &mod : this->models){
         mod.Update(dt);

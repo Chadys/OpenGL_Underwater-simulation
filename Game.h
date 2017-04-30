@@ -42,7 +42,7 @@ public:
     void ProcessInput(GLfloat dt);
     void ProcessMouseMovement(GLdouble xpos, GLdouble ypos);
     void ProcessMouseScroll(GLdouble yoffset);
-    void Update(GLfloat dt);
+    void Update(GLfloat dt, GLfloat currenttime);
     void Render();
 
 private:
