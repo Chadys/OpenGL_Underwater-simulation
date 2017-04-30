@@ -25,7 +25,7 @@ Model::Model()
         : Span_lrf(0), Span_udb(0) { }
 // Draws the model, and thus all its meshes
 void Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
-                 glm::vec3 color, GLfloat alpha, bool outline, GLfloat whirlpooling, glm::vec3 centerpoint,
+                 glm::vec3 color, GLfloat alpha, bool outline, bool wings, GLfloat whirlpooling, glm::vec3 centerpoint,
                  glm::mat4 projection, glm::mat4 view)
 {
     manager.tex2D = NO_TEX;
@@ -46,6 +46,7 @@ void Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm:
     shader.SetMatrix3("transpose_inverse_viewmodel", glm::mat3(glm::transpose(glm::inverse(view * model))));
     shader.SetFloat("alpha", alpha);
     shader.SetVector3f("modelColor", color);
+    shader.SetInteger("wings", wings);
     shader.SetMatrix4("projection", projection);
     shader.SetMatrix4("view", view);
 

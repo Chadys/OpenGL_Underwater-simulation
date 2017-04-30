@@ -32,7 +32,7 @@ public:
 
     // Draws the model, and thus all its meshes
     void Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
-              glm::vec3 color, GLfloat alpha, bool outline, GLfloat whirlpooling, glm::vec3 centerpoint,
+              glm::vec3 color, GLfloat alpha, bool outline, bool wings, GLfloat whirlpooling, glm::vec3 centerpoint,
               glm::mat4 projection, glm::mat4 view);
 
 private:

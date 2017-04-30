@@ -97,7 +97,7 @@ class GameModel : public Game_Object3D
 public:
     // Object state
     Model       model;
-    bool        outline, cullface;
+    bool        outline, cullface, wings;
     GLfloat     whirlpooling, speed, starting_height;
     glm::vec3   centerpoint;
     // Constructor(s)

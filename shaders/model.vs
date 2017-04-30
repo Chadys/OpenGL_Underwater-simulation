@@ -8,6 +8,7 @@ out vec2 all_TexCoord;
 out vec3 all_Normal;
 out vec3 all_FragPos;
 out mat3 all_TBN;
+out vec3 all_Pos;
 
 uniform mat4 model;
 uniform mat3 transpose_inverse_viewmodel;
@@ -47,4 +48,5 @@ void main()
     else
         all_Normal = normalize(vec3(vec4(transpose_inverse_viewmodel * normal, 1.0)));
     all_TexCoord = texCoords;
+    all_Pos = position;
 }

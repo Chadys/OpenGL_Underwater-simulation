@@ -67,6 +67,7 @@ void Game::Init()
     mod.starting_height = 250;
     mod.outline = false;
     mod.cullface = false;
+    mod.wings = true;
     this->models.push_back(mod);
     mod = GameModel("models3D/hummingbird/hummingbird.obj", "hummingbird");
     mod.Size = glm::vec3(0.01);
@@ -76,6 +77,7 @@ void Game::Init()
     mod.speed = -60;
     mod.Rotation.y = -90;
     mod.outline = false;
+    mod.wings = true;
     this->models.push_back(mod);
     mod = GameModel("models3D/ray/something_01.obj", "ray");
     mod.Rotation = glm::vec3(290, 30, -30);
@@ -84,6 +86,7 @@ void Game::Init()
     mod.starting_height = 20;
     mod.centerpoint = glm::vec3(0,20,-20);
     mod.speed = -30;
+    mod.wings = true;
     this->models.push_back(mod);
     for (char i = '0', max = '9'; i <= '1'; ++i, max='5') {
         for (int j = '1'; j <= max; ++j) {
