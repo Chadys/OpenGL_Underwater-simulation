@@ -7,7 +7,6 @@ in mat3 TBN;
 
 out vec4 fragcolor;
 
-uniform float shininess;
 uniform bool back;
 uniform float alpha;
 uniform vec3 modelColor;
@@ -20,10 +19,13 @@ struct DirLight {
     vec3 diffuse;
     vec3 specular;
 };
+
 struct Material {
     sampler2D texture_diffuse1;
     sampler2D texture_specular1;
     bool texture_specular;
+    sampler2D texture_emissive1;
+    bool texture_emissive;
     sampler2D texture_height1;
     bool texture_height;
     sampler2D texture_normal1;
@@ -37,53 +39,74 @@ uniform Material material;
 uniform vec3 viewPos;
 
 // Function prototypes
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
+vec3 CalcDirLight(DirLight light, Material mat, vec3 normal, vec3 viewDir, vec4 textures[6]);
 vec3 hsv2rgb(vec3 c);
+vec4[6] get_textures(Material mat, vec2 coord);
 
 void main(){
+    vec4 textures[6] = get_textures(material, TexCoord);
     float alpha = alpha;
-    if (material.texture_opacity)
-        alpha = min(alpha, texture(material.texture_opacity1, TexCoord).r); // since opacity texture is a B&W image, we can take r, g or b
-	if(alpha<0.1)
+    if (material.texture_opacity){
+        alpha = min(alpha, textures[5].r); // since opacity texture is a B&W image, we can take r, g or b
+	}
+	if(alpha<0.1){
 		discard;
+	}
     vec3 norm;
     if(material.texture_normal){
-        norm = texture(material.texture_normal1, TexCoord).rgb;
+        norm = textures[4].rgb;
         norm = normalize(norm * 2.0 - 1.0);
         norm = normalize(TBN * norm);
     }
     else
         norm = Normal;
     vec3 viewDir = normalize(viewPos - FragPos);
-	if(back)
+	if(back){
 		fragcolor   = vec4(0,0,0,alpha);
-    else
-    	fragcolor   = vec4(hsv2rgb(modelColor), alpha) * vec4(CalcDirLight(dirLight, norm, viewDir), alpha);
+	}
+    else{
+        vec3 true_colors = CalcDirLight(dirLight, material, norm, viewDir, textures);
+        if(material.texture_emissive){
+            vec3 emission = textures[2].rgb;
+            true_colors += emission;
+        }
+    	fragcolor   = vec4(hsv2rgb(modelColor), alpha) * vec4(true_colors, 1.0);
+    }
 	fragcolor *= fade;
 }
 
 //http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
-vec3 hsv2rgb(vec3 c)
-{
+vec3 hsv2rgb(vec3 c){
     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
 // Calculates the color when using a directional light.
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
-{
+vec3 CalcDirLight(DirLight light, Material mat, vec3 normal, vec3 viewDir, vec4 textures[6]){
     vec3 lightDir = normalize(-light.direction);
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // Specular shading
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), mat.shininess);
     // Combine results
-    vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, TexCoord));
-    vec3 diffuse = light.diffuse * diff * vec3(texture(material.texture_diffuse1, TexCoord));
+    vec3 ambient = light.ambient * textures[0].rgb;
+    vec3 diffuse = light.diffuse * diff * textures[0].rgb;
     vec3 specular = light.specular * spec;
-    if(material.texture_specular)
-        specular*=vec3(texture(material.texture_specular1, TexCoord));
+    if(mat.texture_specular){
+        specular *= textures[1].rgb;
+    }
     return (ambient + diffuse + specular);
+}
+
+vec4[6] get_textures(Material mat, vec2 coord){
+    vec4 textures[6];
+    textures[0] = texture(mat.texture_diffuse1, coord);
+    textures[1] = texture(mat.texture_specular1, coord);
+    textures[2] = texture(mat.texture_emissive1, coord);
+    textures[3] = texture(mat.texture_height1, coord);
+    textures[4] = texture(mat.texture_normal1, coord);
+    textures[5] = texture(mat.texture_opacity1, coord);
+    return textures;
 }

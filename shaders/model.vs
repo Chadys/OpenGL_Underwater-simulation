@@ -19,6 +19,8 @@ struct Material {
     sampler2D texture_diffuse1;
     sampler2D texture_specular1;
     bool texture_specular;
+    sampler2D texture_emissive1;
+    bool texture_emissive;
     sampler2D texture_height1;
     bool texture_height;
     sampler2D texture_normal1;

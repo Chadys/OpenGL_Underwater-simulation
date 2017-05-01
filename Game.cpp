@@ -59,7 +59,7 @@ void Game::Init()
     mod.Size = glm::vec3(0.005);
     mod.Position = glm::vec3(50,0,-50);
     mod.centerpoint = glm::vec3(100, 0, 100);
-    mod.speed = 80;
+    mod.speed = 20;
     mod.deformation_magnitude = 1.0;
     this->models.push_back(mod);
     mod = GameModel("models3D/phenix_nocullface/Model_C1018410/fenghuang5.obj", "phenix");

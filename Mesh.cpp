@@ -15,11 +15,7 @@ Mesh::Mesh(vector<Vertex> &vertices, vector<GLuint> &indices, vector<Texture> &t
 
 void Mesh::Draw(Shader shader, bool outline){
     // Bind appropriate textures
-    GLuint diffuseNr = 1;
-    GLuint specularNr = 1;
-    GLuint normalNr = 1;
-    GLuint heightNr = 1;
-    GLuint opacityNr = 1;
+    GLuint diffuseNr = 1, specularNr = 1, emissiveNr = 1, normalNr = 1, heightNr = 1, opacityNr = 1;
     vector<string> reset_tex;
     for(GLuint i = 0; i < this->textures.size(); i++)
     {
@@ -32,6 +28,8 @@ void Mesh::Draw(Shader shader, bool outline){
             ss << diffuseNr++; // Transfer GLuint to stream
         else if(name == "texture_specular")
             ss << specularNr++;
+        else if(name == "texture_emissive")
+            ss << emissiveNr++;
         else if(name == "texture_normal")
             ss << normalNr++;
         else if(name == "texture_height")
@@ -49,7 +47,7 @@ void Mesh::Draw(Shader shader, bool outline){
 
 
     // Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
-    shader.SetFloat("shininess", 8.0f);
+    shader.SetFloat("material.shininess", 8.0f);
     // Draw mesh
     glBindVertexArray(this->VAO);
     shader.SetInteger("back", GL_FALSE);

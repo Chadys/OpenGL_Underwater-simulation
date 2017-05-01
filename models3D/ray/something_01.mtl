@@ -11,6 +11,7 @@ Ns  0
 illum 2
 map_Kd -s 1.5 1.5 1 maps/rejnok_05.jpg
 bump maps/struktura_02.jpg
+map_emissive maps/emit_map.png
 #
 newmtl Material__33
 Ka  0.6 0.6 0.6
@@ -21,6 +22,7 @@ Ns  0
 illum 2
 map_Kd -s 1.5 1.5 1 maps/rejnok_04.jpg
 bump -s 1.8 1.8 1 maps/rejnok_06.jpg
+map_emissive maps/emit_map.png
 #
 newmtl Material__41
 Ka  0.6 0.6 0.6
@@ -31,6 +33,7 @@ Ns  0
 illum 2
 map_Kd -s 2 2 1 maps/rejnok_05.jpg
 bump -s 2 2 1 maps/struktura_02.jpg
+map_emissive maps/emit_map.png
 #
 # Multi/Sub 15_-_Default done 
 #

@@ -154,13 +154,16 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     // 2. Specular maps
     vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-    // 3. Normal maps
+    // 3. Emission maps
+    vector<Texture> emissionMaps = this->loadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emissive");
+    textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
+    // 4. Normal maps
     vector<Texture> heightMaps = this->loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-    // 4. Normal maps
+    // 5. Normal maps
     vector<Texture> normalMaps = this->loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-    // 5. Opacity maps
+    // 6. Opacity maps
     vector<Texture> opacityMaps = this->loadMaterialTextures(material, aiTextureType_OPACITY, "texture_opacity");
     textures.insert(textures.end(), opacityMaps.begin(), opacityMaps.end());
     // }

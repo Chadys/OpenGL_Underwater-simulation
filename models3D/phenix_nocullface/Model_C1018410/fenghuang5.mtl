@@ -13,6 +13,7 @@ newmtl Standard_2
 	Ke 0.0000 0.0000 0.0000
 	map_Ka 02.psd
 	map_Kd 02.psd
+	map_emissive emit_02.png
 
 newmtl Standard_1
 	Ns 10.0000
@@ -28,6 +29,7 @@ newmtl Standard_1
 	map_Ka 01.psd
 	map_Kd 01.psd
 	map_d 01.jpg
+	map_emissive emit_01.png
 
 newmtl Standard_3
 	Ns 10.0000
@@ -43,3 +45,4 @@ newmtl Standard_3
 	map_Ka 03.psd
 	map_Kd 03.psd
 	map_d 03ͨ.jpg
+	map_emissive emit_03.png
