@@ -15,6 +15,8 @@ in vec3 all_Pos[];
 
 uniform float time;
 uniform bool wings;
+uniform float magnitude;
+
 
 vec4 ondulate(vec4 transformed_position, vec3 normal, vec3 position);
 vec4 flap(vec4 transformed_position, vec3 normal, vec3 position);
@@ -44,21 +46,22 @@ void main(){
 }
 
 vec4 ondulate(vec4 transformed_position, vec3 normal, vec3 position){
-    float magnitude = 1.0f;
-    vec3 direction = normal * sin(transformed_position.z*3.0+time) * magnitude;
+    float period = 3.0;
+    vec3 direction = normal * sin(period*transformed_position.z+time) * magnitude;
     if (normal.x > 0.0)
         direction = -direction;
     return transformed_position + vec4(direction, 0.0f);
 }
 
 vec4 flap(vec4 transformed_position, vec3 normal, vec3 position){
-    float magnitude = 0.1f;
-    vec3 direction = normal * sin(10.0*position.x+time) * magnitude * position.x;
+    float period_time = 5.0, period_pos = 0.02;
+    vec3 direction = normal * sin(period_pos*position.z+period_time*time) * magnitude * position.x;
     if (normal.y > 0.0)
+        direction = -direction;
+    if (position.x < 0.0)
         direction = -direction;
     return transformed_position + vec4(direction, 0.0f);
 }
-//TODO adapt magnitude to size of model
 
 vec3 GetSideNormal()
 {

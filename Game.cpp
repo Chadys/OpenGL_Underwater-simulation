@@ -60,6 +60,7 @@ void Game::Init()
     mod.Position = glm::vec3(50,0,-50);
     mod.centerpoint = glm::vec3(100, 0, 100);
     mod.speed = 80;
+    mod.deformation_magnitude = 1.0;
     this->models.push_back(mod);
     mod = GameModel("models3D/phenix_nocullface/Model_C1018410/fenghuang5.obj", "phenix");
     mod.Size = glm::vec3(0.1);
@@ -68,6 +69,7 @@ void Game::Init()
     mod.outline = false;
     mod.cullface = false;
     mod.wings = true;
+    mod.deformation_magnitude = 0.1;
     this->models.push_back(mod);
     mod = GameModel("models3D/hummingbird/hummingbird.obj", "hummingbird");
     mod.Size = glm::vec3(0.01);
@@ -78,6 +80,7 @@ void Game::Init()
     mod.Rotation.y = -90;
     mod.outline = false;
     mod.wings = true;
+    mod.deformation_magnitude = 0.007;
     this->models.push_back(mod);
     mod = GameModel("models3D/ray/something_01.obj", "ray");
     mod.Rotation = glm::vec3(290, 30, -30);
@@ -87,6 +90,7 @@ void Game::Init()
     mod.centerpoint = glm::vec3(0,20,-20);
     mod.speed = -30;
     mod.wings = true;
+    mod.deformation_magnitude = 0.03;
     this->models.push_back(mod);
     for (char i = '0', max = '9'; i <= '1'; ++i, max='5') {
         for (int j = '1'; j <= max; ++j) {
@@ -97,6 +101,7 @@ void Game::Init()
             name+=i;
             name+=j;
             mod = GameModel(filename, name);
+            mod.deformation_magnitude = 0.8;
             mod.Size = glm::vec3(0.02);
             mod.Position = glm::vec3(0, 0, dis(gen));
             mod.starting_height = dis(gen);

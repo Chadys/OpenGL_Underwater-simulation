@@ -98,7 +98,7 @@ public:
     // Object state
     Model       model;
     bool        outline, cullface, wings;
-    GLfloat     whirlpooling, speed, starting_height;
+    GLfloat     whirlpooling, speed, starting_height, deformation_magnitude;
     glm::vec3   centerpoint;
     // Constructor(s)
     GameModel(std::string file, std::string name);
