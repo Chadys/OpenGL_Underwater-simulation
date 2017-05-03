@@ -3,7 +3,7 @@
 //
 
 #include "Game.h"
-
+#include "FogParams.h"
 
 /*------------------------------------CONSTRUCTOR/DESTRUCTOR-----------------------------------------*/
 Game::Game()
@@ -28,24 +28,38 @@ void Game::Init()
     std::uniform_int_distribution<int> dis3(10,100);
 
     // Load shaders
-    Shader wshader = ResourceManager::LoadShader("./shaders/water.vs", "./shaders/water.fs", nullptr, "water");
-    ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox");
-    Shader mshader = ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "shaders/model.gs", "model", {"shaders/LIGHT.fs"});
-    Shader tshader = ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text");
-    ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug");
+    vector<Shader> shaders;
+    shaders.push_back(ResourceManager::LoadShader("./shaders/water.vs", "./shaders/water.fs", nullptr, "water",
+                                                  {"shaders/FOG.fs"}));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "shaders/model.gs", "model",
+                                                 {"shaders/LIGHT.fs", "shaders/FOG.fs"}));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text"));
+    shaders.push_back(ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug"));
 
-    // Configure shaders
-    tshader.SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), true);
-    mshader.SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, true);
-    mshader.SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, true);
-    mshader.SetVector3f("dirLight.diffuse", 0.3f, 0.4f, 0.5f, true);
-    mshader.SetVector3f("dirLight.specular", 0.4f, 0.5f, 0.7f, true);
+    // Configure shaders for value that won't change all throught the program
+    shaders[3].SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), true);
+    shaders[2].SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, true);
+    shaders[2].SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, true);
+    shaders[2].SetVector3f("dirLight.diffuse", 0.3f, 0.4f, 0.5f, true);
+    shaders[2].SetVector3f("dirLight.specular", 0.4f, 0.5f, 0.7f, true);
+    for (const int i  : {0, 2}) {
+        shaders[i].SetInteger("fogParams.iEquation", FogParameters::iFogEquation, GL_TRUE);
+        shaders[i].SetVector4f("fogParams.vFogColor", FogParameters::vFogColor);
+        if(FogParameters::iFogEquation == FOG_EQUATION_LINEAR)
+        {
+            shaders[i].SetFloat("fogParams.fStart", FogParameters::fStart);
+            shaders[i].SetFloat("fogParams.fEnd", FogParameters::fEnd);
+        }
+        else
+            shaders[i].SetFloat("fogParams.fDensity", FogParameters::fDensity);
+    }
 
 
     // Load textures
     // Floor
     GLfloat size(1500);
-    Plane water_surface(glm::vec3(-size/2,-size*0.35,0), glm::vec2(size),
+    Plane water_surface(glm::vec3(-size/2,-size*0.42,0), glm::vec2(size),
                 ResourceManager::LoadTexture("textures/Water_NormalMap.png", GL_FALSE, GL_TRUE, "water_normals"),
                 ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox"));
     water_surface.Rotation.x=90;
@@ -117,8 +131,8 @@ void Game::Init()
     }
 
     // Set render-specific controls
-    Renderer.push_back(new Sprite_Renderer(wshader, 15.0f));
-    Renderer.push_back(new Sprite_Renderer(ResourceManager::GetShader("skybox")));
+    Renderer.push_back(new Sprite_Renderer(shaders[0], 15.0f));
+    Renderer.push_back(new Sprite_Renderer(shaders[1]));
     T_Renderer = new Text_Renderer(this->Width, this->Height);
     T_Renderer->Load("./fonts/Futura_Bold_Font/a_FuturaOrto-Bold_2258.ttf",50);
 }
@@ -179,8 +193,8 @@ void Game::ProcessMouseMovement(GLdouble xpos, GLdouble ypos)
         this->firstMouse = false;
     }
 
-    GLfloat xoffset = xpos - this->lastX;
-    GLfloat yoffset = this->lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+    GLdouble xoffset = xpos - this->lastX;
+    GLdouble yoffset = this->lastY - ypos;  // Reversed since y-coordinates go from bottom to left
 
     this->lastX = xpos;
     this->lastY = ypos;

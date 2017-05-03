@@ -24,8 +24,6 @@
 #include <memory>
 #include <random>
 
-using namespace std;
-
 class Game {
 public:
     // Game state
@@ -47,9 +45,9 @@ public:
 
 private:
     Camera                   Cam;
-    GLfloat                  lastX, lastY;
-    GLboolean                firstMouse;
-    GLboolean                DEBUG;
+    GLdouble                 lastX, lastY;
+    bool                     firstMouse;
+    bool                     DEBUG;
     vector<Sprite_Renderer*> Renderer;
     Text_Renderer            *T_Renderer;
     vector<Plane>            planes;

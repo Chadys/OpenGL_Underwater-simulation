@@ -9,6 +9,7 @@ out vec3 all_Normal;
 out vec3 all_FragPos;
 out mat3 all_TBN;
 out vec3 all_Pos;
+out vec4 all_EyeSpacePos;
 
 uniform mat4 model;
 uniform mat3 transpose_inverse_viewmodel;
@@ -31,9 +32,9 @@ struct Material {
 };
 uniform Material material;
 
-void main()
-{
-    gl_Position = projection * view * model * vec4(position, 1.0f);
+void main(){
+    all_EyeSpacePos = view * model * vec4(position, 1.0);
+    gl_Position = projection * all_EyeSpacePos;
     all_FragPos = vec3(model * vec4(position, 1.0f));
     if(material.texture_normal){
         vec3 T = normalize(transpose_inverse_viewmodel * tangent);

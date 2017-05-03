@@ -12,6 +12,8 @@ out vec3 Normal;
 in mat3 all_TBN[];
 out mat3 TBN;
 in vec3 all_Pos[];
+in vec4 all_EyeSpacePos[];
+out vec4 EyeSpacePos;
 
 uniform float time;
 uniform bool wings;
@@ -39,6 +41,7 @@ void main(){
         FragPos = all_FragPos[i];
         Normal = all_Normal[i];
         TBN = all_TBN[i];
+        EyeSpacePos = all_EyeSpacePos[i];
         EmitVertex();
     }
     EndPrimitive();

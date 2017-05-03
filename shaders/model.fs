@@ -4,6 +4,7 @@ in vec2 TexCoord;
 in vec3 FragPos;
 in vec3 Normal;
 in mat3 TBN;
+in vec4 EyeSpacePos;
 
 out vec4 fragcolor;
 
@@ -34,6 +35,15 @@ struct Material {
     bool texture_opacity;
     float shininess;
 };
+uniform struct FogParameters
+{
+   vec4 vFogColor; // Fog color
+   float fStart; // This is only for linear fog
+   float fEnd; // This is only for linear fog
+   float fDensity; // For exp and exp2 equation
+
+   int iEquation; // 0 = linear, 1 = exp, 2 = exp2
+} fogParams;
 uniform DirLight dirLight;
 uniform Material material;
 uniform vec3 viewPos;
@@ -41,6 +51,7 @@ uniform mat3 transpose_inverse_viewmodel;
 
 // Function prototypes
 vec3 CalcDirLight(DirLight light, Material mat, vec3 normal, vec3 viewDir, vec4 textures[6]);
+float getFogFactor(FogParameters params, float fFogCoord);
 vec3 hsv2rgb(vec3 c);
 vec4[6] get_textures(Material mat, vec2 coord);
 
@@ -75,6 +86,10 @@ void main(){
     	fragcolor   = vec4(hsv2rgb(modelColor), alpha) * vec4(true_colors, 1.0);
     }
 	fragcolor *= fade;
+
+    // Add fog
+    float fFogCoord = abs(EyeSpacePos.z/EyeSpacePos.w);
+    fragcolor = mix(fragcolor, fogParams.vFogColor, getFogFactor(fogParams, fFogCoord));
 }
 
 //http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl

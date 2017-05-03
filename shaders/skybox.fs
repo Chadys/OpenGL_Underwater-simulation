@@ -6,7 +6,6 @@ uniform samplerCube skybox;
 
 uniform float fade;
 
-void main()
-{
+void main(){
     color = texture(skybox, TexCoords) * fade;
 }
