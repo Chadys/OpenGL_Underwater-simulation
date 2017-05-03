@@ -37,6 +37,7 @@ struct Material {
 uniform DirLight dirLight;
 uniform Material material;
 uniform vec3 viewPos;
+uniform mat3 transpose_inverse_viewmodel;
 
 // Function prototypes
 vec3 CalcDirLight(DirLight light, Material mat, vec3 normal, vec3 viewDir, vec4 textures[6]);
@@ -56,6 +57,7 @@ void main(){
     if(material.texture_normal){
         norm = textures[4].rgb;
         norm = normalize(norm * 2.0 - 1.0);
+        norm = normalize(vec4(norm, 1.0).xyz);
         norm = normalize(TBN * norm);
     }
     else

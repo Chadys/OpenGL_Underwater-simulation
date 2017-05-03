@@ -116,8 +116,8 @@ void Sprite_Renderer::initRenderData(GLfloat repeat)
     glBindVertexArray(0);
 }
 
-// TEXTURED 3D SQUARE
-void Sprite_Renderer::DrawSprite(State_Manager &manager, const Tex &texture, GLboolean &destroy, glm::vec3 position, glm::vec2 size, glm::vec3 rotation, GLboolean billboard, glm::vec2 deplace, glm::mat4 projection, glm::mat4 view)
+// TEXTURED 3D PLANE
+void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture2D &normals, const Texture3D &skybox, glm::vec3 position, glm::vec2 size, glm::vec3 rotation, glm::mat4 projection, glm::mat4 view)
 {
     // Prepare transformations
     manager.Active(this->shader);
@@ -136,24 +136,14 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, const Tex &texture, GLb
     this->shader.SetMatrix4("view", view);
     this->shader.SetMatrix4("projection", projection);
 
-    this->shader.SetVector2f("deplace", deplace);
-    if(billboard) {
-        this->shader.SetInteger("isBillboard", 0);
-        this->shader.SetVector2f("Billboard_Size", size);
-        if(!Camera::in_frustrum_square(projection*view*model))
-            destroy = GL_TRUE;
-
-    }
-
     glActiveTexture(GL_TEXTURE0);
-    manager.ActiveTex2D(texture);
+    manager.ActiveTex2D(normals);
+    glActiveTexture(GL_TEXTURE1);
+    manager.ActiveTex3D(skybox);
 
     glBindVertexArray(this->quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
-    this->shader.SetVector2f("deplace", glm::vec2(0));
-    if(billboard)
-        this->shader.SetInteger("isBillboard", 0);
 }
 
 // COLORED SQUARE
@@ -183,7 +173,7 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, glm::vec2 position, glm
 }
 
 // SKYBOX
-void Sprite_Renderer::DrawSprite(State_Manager &manager, const Tex &texture, glm::mat4 projection, glm::mat4 view)
+void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture3D &texture, glm::mat4 projection, glm::mat4 view)
 {
     // Prepare transformations
     manager.Active(this->shader);

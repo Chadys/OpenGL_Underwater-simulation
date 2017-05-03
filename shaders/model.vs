@@ -36,15 +36,11 @@ void main()
     gl_Position = projection * view * model * vec4(position, 1.0f);
     all_FragPos = vec3(model * vec4(position, 1.0f));
     if(material.texture_normal){
-        vec3 T = normalize(vec3(model * vec4(tangent,   0.0)));
-        vec3 N = normalize(vec3(model * vec4(normal,    0.0)));
-        // re-orthogonalize T with respect to N
-        T = normalize(T - dot(T, N) * N);
+        vec3 T = normalize(transpose_inverse_viewmodel * tangent);
+        vec3 N = normalize(transpose_inverse_viewmodel * normal);
         vec3 B = cross(N, T);
-        // TBN must form a right handed coord system.
-        // Some models have symetric UVs. Check and fix.
-        if (dot(cross(N, T), B) < 0.0)
-            T = -T;
+        if (position.x > 0.0)
+            N = -N;
         all_TBN = mat3(T, B, N);
     }
     else

@@ -25,7 +25,7 @@ public:
     Texture2D   Tex;
     // Draw sprite
     GameObject(Texture2D sprite) : Tex(sprite) { }
-    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::vec2 deplace, glm::mat4 projection, glm::mat4 view) = 0;
+    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection, glm::mat4 view) = 0;
 };
 
 // Container object for holding all state relevant for a single
@@ -38,25 +38,24 @@ public:
     glm::vec3   Position, Size, Color, Rotation;
     GLfloat     Alpha;
     // Constructor(s)
-    // Object3D();
     Game_Object3D(glm::vec3 pos, glm::vec3 size, glm::vec3 color = glm::vec3(1.0f))
             : Position(pos), Size(size), Color(color), Rotation(0), Alpha(1.0f) { }
 };
 
 
 
-/*----------------------------------------CUBE---------------------------------------------*/
+/*----------------------------------------3D PLANES---------------------------------------------*/
 
-class Object3D : public GameObject
+class Plane : public GameObject
 {
 public:
     // Object state
     glm::vec3   Position, Rotation;
     glm::vec2   Size;
-    GLboolean   isBillboard, toBeDestroyed;
+    Texture3D   Reflect;
     // Constructor(s)
-    Object3D(glm::vec3 pos, glm::vec2 size, Texture2D sprite, GLboolean billboard = GL_FALSE);
-    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::vec2 deplace = glm::vec2(0), glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
+    Plane(glm::vec3 pos, glm::vec2 size, Texture2D normals, Texture3D reflect);
+    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
 
 };
 

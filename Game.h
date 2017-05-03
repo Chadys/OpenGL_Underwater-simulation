@@ -52,8 +52,7 @@ private:
     GLboolean                DEBUG;
     vector<Sprite_Renderer*> Renderer;
     Text_Renderer            *T_Renderer;
-    vector<Object3D>         objects;
-    vector<Square>           squares;
+    vector<Plane>            planes;
     vector<Text>             texts;
     std::vector<GameModel> 	 models;
     vector<string> get_skybox(string path, string ext);

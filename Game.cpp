@@ -28,14 +28,13 @@ void Game::Init()
     std::uniform_int_distribution<int> dis3(10,100);
 
     // Load shaders
-    Shader shader = ResourceManager::LoadShader("./shaders/jeu.vs", "./shaders/jeu.fs", "./shaders/jeu.gs", "jeu");
+    Shader wshader = ResourceManager::LoadShader("./shaders/water.vs", "./shaders/water.fs", "./shaders/water.gs", "water");
     ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox");
     Shader mshader = ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "shaders/model.gs", "model");
     Shader tshader = ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text");
     ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug");
 
     // Configure shaders
-    shader.SetInteger("sprite", 0, true);
     tshader.SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), true);
     mshader.SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, true);
     mshader.SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, true);
@@ -45,13 +44,12 @@ void Game::Init()
 
     // Load textures
     // Floor
-    GLfloat size(1000);
-    Object3D floor(glm::vec3(-size/2,-size*0.506,0), glm::vec2(size), ResourceManager::LoadTexture("./textures/sol.png", GL_FALSE, GL_TRUE, "floor"));
-    floor.Rotation.x=-90;
-    objects.push_back(floor);
-
-    // Cubemap (Skybox)
-    ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox");
+    GLfloat size(1500);
+    Plane water_surface(glm::vec3(-size/2,-size*0.36,0), glm::vec2(size),
+                ResourceManager::LoadTexture("textures/Water_NormalMap.png", GL_FALSE, GL_TRUE, "water_normals"),
+                ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox"));
+    water_surface.Rotation.x=90;
+    planes.push_back(water_surface);
 
     // Models
     GameModel mod = GameModel("models3D/shark/Model_D0202004/wshark.obj", "shark");
@@ -123,8 +121,7 @@ void Game::Init()
     this->texts.push_back(Text("Press ENTER to try again", glm::vec2(this->Width/2, this->Height*0.66f), this->Width/1920*1.5, glm::vec4(1)));
 
     // Set render-specific controls
-    Renderer.push_back(new Sprite_Renderer(shader, 1.0f));
-    Renderer.push_back(new Sprite_Renderer(shader, 15.0f));
+    Renderer.push_back(new Sprite_Renderer(wshader, 15.0f));
     Renderer.push_back(new Sprite_Renderer(ResourceManager::GetShader("skybox")));
     T_Renderer = new Text_Renderer(this->Width, this->Height);
     T_Renderer->Load("./fonts/Futura_Bold_Font/a_FuturaOrto-Bold_2258.ttf",50);
@@ -135,6 +132,7 @@ void Game::Update(GLfloat dt, GLfloat currenttime)
 {
     Shader mshader = ResourceManager::GetShader("model");
 
+    ResourceManager::GetShader("water").SetVector3f("viewPos", this->Cam.Position, GL_TRUE);
     this->State_manager.Update(dt);
     this->State_manager.Active(mshader);
     mshader.SetVector3f("viewPos", this->Cam.Position);
@@ -209,21 +207,18 @@ void Game::Render()
     projection3D = glm::perspective(glm::radians(this->Cam.Zoom), static_cast<GLfloat>(this->Width)/static_cast<GLfloat>(this->Height), 0.1f, 1000.0f);
     projection2D = glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f);
 
-    for (Square &s : squares)
-        s.Draw(this->State_manager,*Renderer[0], projection2D, glm::mat4(), GL_TRUE);
-//    objects[0].Draw(this->State_manager, *Renderer[1], glm::vec2(-this->Cam.Position.x, this->Cam.Position.z)/100.0f,projection3D, glm::mat4(glm::mat3(view3D)));
-    for(int i = 1; i < this->objects.size(); i++)
-        objects[i].Draw(this->State_manager, *Renderer[0], glm::vec2(0),projection3D, view3D);
-    for(int i = 0; i < this->models.size(); i++) {
-        if(!models[i].cullface)
+    for(GameModel &mod : this->models) {
+        if(!mod.cullface)
             glDisable(GL_CULL_FACE);
-        models[i].Draw(this->State_manager, ResourceManager::GetShader("model"), projection3D, view3D);
+        mod.Draw(this->State_manager, ResourceManager::GetShader("model"), projection3D, view3D);
         if(this->DEBUG)
-            models[i].Draw(this->State_manager, ResourceManager::GetShader("debug"), projection3D, view3D);
-        if(!models[i].cullface)
+            mod.Draw(this->State_manager, ResourceManager::GetShader("debug"), projection3D, view3D);
+        if(!mod.cullface)
             glEnable(GL_CULL_FACE);
     }
-    Renderer[2]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
+    for(Plane &plane : this->planes)
+        plane.Draw(this->State_manager, *Renderer[0], projection3D, view3D);
+    Renderer[1]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
 }
 
 /*------------------------------------MISCELLANOUS-----------------------------------------*/

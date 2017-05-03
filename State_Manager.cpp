@@ -3,7 +3,7 @@
 //
 
 #include "State_Manager.h"
-State_Manager::State_Manager() : shader(NO_SHADER), tex2D(NO_TEX), tex3D(GL_FALSE), fade(0), Fade(FADIN) { }
+State_Manager::State_Manager() : shader(NO_SHADER), tex2D(NO_TEX), tex3D(0), fade(0), Fade(FADIN) { }
 
 void State_Manager::Active(Shader &_shader){
     if (this->shader != _shader.ID/3){
@@ -13,16 +13,16 @@ void State_Manager::Active(Shader &_shader){
     _shader.SetFloat("fade", this->fade);
 }
 
-void State_Manager::ActiveTex2D(const Tex& texture){
+void State_Manager::ActiveTex2D(const Texture2D& texture){
     if (this->tex2D != texture.ID/2+1){
         this->tex2D = static_cast<Active_Tex2D>(texture.ID/2+1);
         texture.Bind();
     }
 }
 
-void State_Manager::ActiveTex3D(const Tex& texture){
-    if (!this->tex3D){
-        this->tex3D = GL_TRUE;
+void State_Manager::ActiveTex3D(const Texture3D& texture){
+    if (this->tex3D < 2){
+        this->tex3D++;
         texture.Bind();
     }
 }

@@ -16,14 +16,14 @@ void Square::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 p
 
  //-----------------
 
-Object3D::Object3D(glm::vec3 pos, glm::vec2 size, Texture2D sprite, GLboolean billboard)
-        : GameObject(sprite), Position(pos), Size(size), isBillboard(billboard), toBeDestroyed(GL_FALSE) {
+Plane::Plane(glm::vec3 pos, glm::vec2 size, Texture2D normals, Texture3D reflect)
+        : GameObject(normals), Position(pos), Size(size), Reflect(reflect) {
     this->Rotation.y+=180;
 }
 
-void Object3D::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::vec2 deplace, glm::mat4 projection, glm::mat4 view)
+void Plane::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection, glm::mat4 view)
 {
-    renderer.DrawSprite(manager, this->Tex, this->toBeDestroyed, this->Position, this->Size, this->Rotation, this->isBillboard, deplace, projection, view);
+    renderer.DrawSprite(manager, this->Tex, this->Reflect, this->Position, this->Size, this->Rotation, projection, view);
 }
 
 //-----------------

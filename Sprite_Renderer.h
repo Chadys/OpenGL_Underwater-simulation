@@ -31,9 +31,9 @@ public:
     // Destructor
     virtual ~Sprite_Renderer();
     // Renders a defined quad textured with given sprite
-    virtual void DrawSprite(State_Manager &manager, const Tex &texture, GLboolean &destroy, glm::vec3 position, glm::vec2 size = glm::vec2(1.0f), glm::vec3 rotation = glm::vec3(0), GLboolean billboard = GL_FALSE, glm::vec2 deplace = glm::vec2(0), glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
+    virtual void DrawSprite(State_Manager &manager, const Texture2D &normals, const Texture3D &skybox, glm::vec3 position, glm::vec2 size = glm::vec2(1.0f), glm::vec3 rotation = glm::vec3(0), glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
     virtual void DrawSprite(State_Manager &manager, glm::vec2 position, glm::vec2 size, GLboolean isCircle, glm::vec3 color1, glm::vec3 color2, Effect effect, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4(), GLboolean border = GL_FALSE);
-    virtual void DrawSprite(State_Manager &manager, const Tex &texture, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
+    virtual void DrawSprite(State_Manager &manager, const Texture3D &texture, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
 
 private:
     // Render state

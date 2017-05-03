@@ -170,6 +170,7 @@ Model ResourceManager::loadModelFromFile(std::string file){
     // Read file via ASSIMP
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs |
+                                                   aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph |
                                                    aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals);
     // Check for errors
     if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
