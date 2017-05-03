@@ -124,11 +124,11 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture2D &normal
     glm::mat4 model;
     model = glm::translate(model, position);  // First translate (transformations are: scale happens first, then rotation and then final translation happens; reversed order)
 
-    model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); //to rotate around center
+    model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); //to rotate around center, first translate the center to 0,0
     model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f,0.0f,0.0f)); // Then rotate
     model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f,1.0f,0.0f));
     model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f,0.0f,1.0f));
-    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f));
+    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); //then translate back
 
     model = glm::scale(model, glm::vec3(size, 0)); // Last scale
 

@@ -84,24 +84,6 @@ vec3 hsv2rgb(vec3 c){
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-// Calculates the color when using a directional light.
-vec3 CalcDirLight(DirLight light, Material mat, vec3 normal, vec3 viewDir, vec4 textures[6]){
-    vec3 lightDir = normalize(-light.direction);
-    // Diffuse shading
-    float diff = max(dot(normal, lightDir), 0.0);
-    // Specular shading
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), mat.shininess);
-    // Combine results
-    vec3 ambient = light.ambient * textures[0].rgb;
-    vec3 diffuse = light.diffuse * diff * textures[0].rgb;
-    vec3 specular = light.specular * spec;
-    if(mat.texture_specular){
-        specular *= textures[1].rgb;
-    }
-    return (ambient + diffuse + specular);
-}
-
 vec4[6] get_textures(Material mat, vec2 coord){
     vec4 textures[6];
     textures[0] = texture(mat.texture_diffuse1, coord);

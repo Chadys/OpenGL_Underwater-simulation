@@ -28,9 +28,9 @@ void Game::Init()
     std::uniform_int_distribution<int> dis3(10,100);
 
     // Load shaders
-    Shader wshader = ResourceManager::LoadShader("./shaders/water.vs", "./shaders/water.fs", "./shaders/water.gs", "water");
+    Shader wshader = ResourceManager::LoadShader("./shaders/water.vs", "./shaders/water.fs", nullptr, "water");
     ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox");
-    Shader mshader = ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "shaders/model.gs", "model");
+    Shader mshader = ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "shaders/model.gs", "model", {"shaders/LIGHT.fs"});
     Shader tshader = ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text");
     ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug");
 
@@ -45,7 +45,7 @@ void Game::Init()
     // Load textures
     // Floor
     GLfloat size(1500);
-    Plane water_surface(glm::vec3(-size/2,-size*0.36,0), glm::vec2(size),
+    Plane water_surface(glm::vec3(-size/2,-size*0.35,0), glm::vec2(size),
                 ResourceManager::LoadTexture("textures/Water_NormalMap.png", GL_FALSE, GL_TRUE, "water_normals"),
                 ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox"));
     water_surface.Rotation.x=90;
@@ -115,10 +115,6 @@ void Game::Init()
             this->models.push_back(mod);
         }
     }
-
-    // Texts
-    this->texts.push_back(Text("GAME OVER", glm::vec2(this->Width/2, this->Height/3), this->Width/1920*2, glm::vec4(1)));
-    this->texts.push_back(Text("Press ENTER to try again", glm::vec2(this->Width/2, this->Height*0.66f), this->Width/1920*1.5, glm::vec4(1)));
 
     // Set render-specific controls
     Renderer.push_back(new Sprite_Renderer(wshader, 15.0f));

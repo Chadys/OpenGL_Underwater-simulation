@@ -37,8 +37,8 @@ public:
     static std::map<std::string, Model>      Models;
 
     // Loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
-    static Shader   LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name);
-    // Retrieves a stored sader
+    static Shader   LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name, std::vector<const GLchar *> common_shaders = {});
+    // Retrieves a stored shader
     static Shader   GetShader(std::string name);
     // Loads (and generates) a texture from file
     static Texture2D LoadTexture(const GLchar *file, GLboolean alpha, GLboolean repeat, std::string name);
@@ -58,7 +58,7 @@ private:
     // Private constructor, that is we do not want any actual resource manager objects. Its members and functions should be publicly available (static).
     ResourceManager() { }
     // Loads and generates a shader from file
-    static Shader    loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile = nullptr);
+    static Shader    loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile = nullptr, std::vector<const GLchar *> common_shaders = {});
     // Loads a single texture from file
     static Texture2D loadTextureFromFile(const GLchar *file, GLboolean alpha, GLboolean repeat);
     // Loads a single texture from file

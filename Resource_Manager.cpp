@@ -14,9 +14,9 @@ std::map<std::string, Shader>       ResourceManager::Shaders;
 std::map<std::string, Model>        ResourceManager::Models;
 
 
-Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name)
+Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name, std::vector<const GLchar *> common_shaders)
 {
-    Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile);
+    Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile, common_shaders);
     return Shaders[name];
 }
 
@@ -71,36 +71,50 @@ void ResourceManager::Clear()
         glDeleteTextures(1, &iter.second.ID);
 }
 
-Shader ResourceManager::loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile)
+Shader ResourceManager::loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::vector<const GLchar *> common_shaders)
 {
     // 1. Retrieve the vertex/fragment source code from filePath
-    std::string vertexCode;
-    std::string fragmentCode;
-    std::string geometryCode;
+    std::string vertexCode, fragmentCode, geometryCode;
     try
     {
         // Open files
         std::ifstream vertexShaderFile(vShaderFile);
         std::ifstream fragmentShaderFile(fShaderFile);
-        std::stringstream vShaderStream, fShaderStream;
+        std::stringstream vShaderStream, fShaderStream, gShaderStream;
         // Read file's buffer contents into streams
         vShaderStream << vertexShaderFile.rdbuf();
         fShaderStream << fragmentShaderFile.rdbuf();
         // close file handlers
         vertexShaderFile.close();
         fragmentShaderFile.close();
-        // Convert stream into string
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
         // If geometry shader path is present, also load a geometry shader
         if (gShaderFile != nullptr)
         {
             std::ifstream geometryShaderFile(gShaderFile);
-            std::stringstream gShaderStream;
             gShaderStream << geometryShaderFile.rdbuf();
             geometryShaderFile.close();
-            geometryCode = gShaderStream.str();
         }
+        // Deal with common shaders
+        for (const GLchar *cShaderFile : common_shaders){
+            std::ifstream commonShaderFile(cShaderFile);
+            char type = cShaderFile[strlen(cShaderFile)-2];
+            switch(type){
+                case 'v':
+                    vShaderStream << commonShaderFile.rdbuf();
+                    break;
+                case 'f':
+                    fShaderStream << commonShaderFile.rdbuf();
+                    break;
+                default:
+                    gShaderStream << commonShaderFile.rdbuf();
+            }
+            commonShaderFile.close();
+        }
+        // Convert stream into string
+        vertexCode = vShaderStream.str();
+        fragmentCode = fShaderStream.str();
+        if (gShaderFile != nullptr)
+            geometryCode = gShaderStream.str();
     }
     catch (std::exception e)
     {
