@@ -6,12 +6,12 @@
 #include "Resource_Manager.h"
 
 
-Square::Square(glm::vec2 position, glm::vec2 size, glm::vec3 color1, glm::vec3 color2, Effect effect, GLboolean circle)
-        : Position(position), Size(size), IsCircle(circle), Color1(color1), Color2(color2), Effet(effect) { }
+Particle::Particle(glm::vec2 position, Texture2D tex, float decay)
+        : GameObject(tex), Position(position), Decay(decay) { }
 
-void Square::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection, glm::mat4 view, GLboolean border)
+void Particle::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection, glm::mat4 view)
 {
-    renderer.DrawSprite(manager, this->Position, this->Size, this->IsCircle, this->Color1, this->Color2, this->Effet, projection, view, border);
+    renderer.DrawSprite(manager, this->Position, projection, view);
 }
 
  //-----------------
@@ -63,7 +63,7 @@ void GameModel::SetSide(GLfloat pos, Side side_local, Side side_model){
         case LEFT_SIDE :
             newpos = pos-(this->model.Span_lrf.x*this->Size.z);
             break;
-        case RIGHT_SIDE :
+        default : //RIGHT_SIDE
             newpos = pos-(this->model.Span_lrf.y*this->Size.z);
     }
     switch(side_local){

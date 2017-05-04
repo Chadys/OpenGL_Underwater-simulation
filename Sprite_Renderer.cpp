@@ -7,7 +7,10 @@
 
 Sprite_Renderer::Sprite_Renderer(const Shader &shader, GLfloat repeat){
     this->shader = shader;
-    this->initRenderData(repeat);
+    if(repeat)
+        this->initRenderData(repeat);
+    else
+        this->initPosRenderData();
 }
 
 Sprite_Renderer::Sprite_Renderer(const Shader &shader){
@@ -116,6 +119,28 @@ void Sprite_Renderer::initRenderData(GLfloat repeat)
     glBindVertexArray(0);
 }
 
+// ONE POSITION
+void Sprite_Renderer::initPosRenderData()
+{
+    // Configure VAO/VBO
+    GLuint VBO;
+
+    glGenVertexArrays(1, &this->quadVAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(this->quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    GLfloat vertice[] = { 0.0f, 0.0f };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertice), &vertice, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
 // TEXTURED 3D PLANE
 void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture2D &normals, const Texture3D &skybox, glm::vec3 position, glm::vec2 size, glm::vec3 rotation, glm::mat4 projection, glm::mat4 view)
 {
@@ -146,30 +171,21 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture2D &normal
     glBindVertexArray(0);
 }
 
-// COLORED SQUARE
-void Sprite_Renderer::DrawSprite(State_Manager &manager, glm::vec2 position, glm::vec2 size, GLboolean isCircle, glm::vec3 color1, glm::vec3 color2, Effect effect, glm::mat4 projection, glm::mat4 view, GLboolean border)
+// PARTICULE
+void Sprite_Renderer::DrawSprite(State_Manager &manager, glm::vec2 position, glm::mat4 projection, glm::mat4 view)
 {
     //Prepare transformations
     manager.Active(this->shader);
     glm::mat4 model;
     model = glm::translate(model, glm::vec3(position,0.0f));
 
-    model = glm::scale(model, glm::vec3(size, 0.0f));
-
     this->shader.SetMatrix4("model", model);
     this->shader.SetMatrix4("view", view);
     this->shader.SetMatrix4("projection", projection);
 
-    this->shader.SetInteger("border", border);
-    this->shader.SetInteger("isCircle", isCircle);
-    this->shader.SetInteger("effect", effect);
-    this->shader.SetVector3f("color1", color1);
-    this->shader.SetVector3f("color2", color2);
-
     glBindVertexArray(this->quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDrawArrays(GL_POINT, 0, 1);
     glBindVertexArray(0);
-    this->shader.SetInteger("effect", -1);
 }
 
 // SKYBOX

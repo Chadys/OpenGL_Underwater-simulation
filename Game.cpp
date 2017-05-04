@@ -36,13 +36,14 @@ void Game::Init()
                                                  {"shaders/LIGHT.fs", "shaders/FOG.fs"}));
     shaders.push_back(ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text"));
     shaders.push_back(ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug"));
+    shaders.push_back(ResourceManager::LoadShader("shaders/particle.vs", "shaders/particle.fs", "shaders/particle.gs", "particle"));
 
     // Configure shaders for value that won't change all throught the program
-    shaders[3].SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), true);
-    shaders[2].SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, true);
-    shaders[2].SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, true);
-    shaders[2].SetVector3f("dirLight.diffuse", 0.3f, 0.4f, 0.5f, true);
-    shaders[2].SetVector3f("dirLight.specular", 0.4f, 0.5f, 0.7f, true);
+    shaders[3].SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), GL_TRUE);
+    shaders[2].SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, GL_TRUE);
+    shaders[2].SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, GL_TRUE);
+    shaders[2].SetVector3f("dirLight.diffuse", 0.3f, 0.4f, 0.5f, GL_TRUE);
+    shaders[2].SetVector3f("dirLight.specular", 0.4f, 0.5f, 0.7f, GL_TRUE);
     for (const int i  : {0, 2}) {
         shaders[i].SetInteger("fogParams.iEquation", FogParameters::iFogEquation, GL_TRUE);
         shaders[i].SetVector4f("fogParams.vFogColor", FogParameters::vFogColor);
@@ -64,6 +65,9 @@ void Game::Init()
                 ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox"));
     water_surface.Rotation.x=90;
     planes.push_back(water_surface);
+
+    // Particle
+    ResourceManager::LoadTexture("textures/bubble.png", GL_TRUE, GL_FALSE, "bubble");
 
     // Models
     GameModel mod = GameModel("models3D/shark/Model_D0202004/wshark.obj", "shark");
@@ -133,6 +137,7 @@ void Game::Init()
     // Set render-specific controls
     Renderer.push_back(new Sprite_Renderer(shaders[0], 15.0f));
     Renderer.push_back(new Sprite_Renderer(shaders[1]));
+    Renderer.push_back(new Sprite_Renderer(shaders[5], 0));
     T_Renderer = new Text_Renderer(this->Width, this->Height);
     T_Renderer->Load("./fonts/Futura_Bold_Font/a_FuturaOrto-Bold_2258.ttf",50);
 }
@@ -199,13 +204,13 @@ void Game::ProcessMouseMovement(GLdouble xpos, GLdouble ypos)
     this->lastX = xpos;
     this->lastY = ypos;
 
-    this->Cam.ProcessMouseMovement(xoffset, yoffset);
+    this->Cam.ProcessMouseMovement(static_cast<GLfloat>(xoffset), static_cast<GLfloat>(yoffset));
 }
 
 
 void Game::ProcessMouseScroll(GLdouble yoffset)
 {
-    this->Cam.ProcessMouseScroll(yoffset);
+    this->Cam.ProcessMouseScroll(static_cast<GLfloat>(yoffset));
 }
 
 /*------------------------------------RENDER-----------------------------------------*/

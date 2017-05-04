@@ -60,21 +60,19 @@ public:
 };
 
 
-/*----------------------------------COLORED-SQUARE-----------------------------------------*/
+/*----------------------------------PARTICLE-----------------------------------------*/
 
-class Square
+class Particle : public GameObject
 {
 public:
     // Object state
-    glm::vec2   Position, Size;
-    GLboolean   IsCircle;
-    glm::vec3   Color1, Color2;
-    Effect      Effet;
+    glm::vec2   Position;
+    float       Decay;
 
     // Constructor(s)
-    Square(glm::vec2 position, glm::vec2 size, glm::vec3 color1, glm::vec3 color2 = glm::vec3(0), Effect effect = NONE, GLboolean circle = GL_FALSE);
+    Particle(glm::vec2 position, Texture2D tex, float decay = 1000);
     // Draw sprite
-    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4(), GLboolean border = GL_FALSE);
+    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
 };
 
 
