@@ -153,13 +153,14 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture2D &normal
     model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f,0.0f,0.0f)); // Then rotate
     model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f,1.0f,0.0f));
     model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f,0.0f,1.0f));
-    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); //then translate back
+    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); //then translate back (reversed order)
 
-    model = glm::scale(model, glm::vec3(size, 0)); // Last scale
+    model = glm::scale(model, glm::vec3(size, 1)); // Last scale
 
     this->shader.SetMatrix4("model", model);
     this->shader.SetMatrix4("view", view);
     this->shader.SetMatrix4("projection", projection);
+    shader.SetMatrix3("transpose_inverse_viewmodel", glm::mat3(glm::transpose(glm::inverse(view * model))));
 
     glActiveTexture(GL_TEXTURE0);
     manager.ActiveTex2D(normals);

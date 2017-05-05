@@ -53,7 +53,9 @@ private:
     vector<Plane>            planes;
     vector<Text>             texts;
     std::vector<GameModel> 	 models;
-    vector<string> get_skybox(string path, string ext);
+
+    vector<string>           get_skybox(string path, string ext);
+    void                     setConstantShadersUniforms(vector<Shader> &shaders);
 };
 
 

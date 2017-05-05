@@ -33,13 +33,12 @@ void main()
 {
     vec3 final_normal = texture(material.texture_normal1, texCoords).rgb;
     gl_Position = projection * view * model * vec4(position, 1.0f);
-    if(material.texture_normal){
-        vec3 T = normalize(transpose_inverse_viewmodel * tangent);
-        vec3 N = normalize(transpose_inverse_viewmodel * normal);
+    if(false/*material.texture_normal*/){
+        vec3 T = normalize((model * vec4(tangent, 0.0)).xyz);
+        vec3 N = normalize((model * vec4(normal, 0.0)).xyz);
         vec3 B = cross(N, T);
         mat3 TBN = mat3(T, B, N);
         final_normal = normalize(final_normal * 2.0 - 1.0);
-        final_normal = normalize(vec4(final_normal, 1.0).xyz);
         vs_out.normal = normalize(TBN * final_normal);
     }
     else{

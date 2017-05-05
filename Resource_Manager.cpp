@@ -99,11 +99,11 @@ Shader ResourceManager::loadShaderFromFile(const GLchar *vShaderFile, const GLch
             std::ifstream commonShaderFile(cShaderFile);
             char type = cShaderFile[strlen(cShaderFile)-2];
             switch(type){
-                case 'v':
-                    vShaderStream << commonShaderFile.rdbuf();
-                    break;
                 case 'f':
                     fShaderStream << commonShaderFile.rdbuf();
+                    break;
+                case 'v':
+                    vShaderStream << commonShaderFile.rdbuf();
                     break;
                 default:
                     gShaderStream << commonShaderFile.rdbuf();

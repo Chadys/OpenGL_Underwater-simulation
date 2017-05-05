@@ -36,12 +36,10 @@ void main(){
     all_EyeSpacePos = view * model * vec4(position, 1.0);
     gl_Position = projection * all_EyeSpacePos;
     all_FragPos = vec3(model * vec4(position, 1.0f));
-    if(material.texture_normal){
-        vec3 T = normalize(transpose_inverse_viewmodel * tangent);
-        vec3 N = normalize(transpose_inverse_viewmodel * normal);
+    if(false/*material.texture_normal*/){
+        vec3 T = normalize((model * vec4(tangent, 0.0)).xyz);
+        vec3 N = normalize((model * vec4(normal, 0.0))).xyz;
         vec3 B = cross(N, T);
-        if (position.x > 0.0)
-            N = -N;
         all_TBN = mat3(T, B, N);
     }
     else

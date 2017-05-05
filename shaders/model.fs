@@ -61,14 +61,13 @@ void main(){
     if (material.texture_opacity){
         alpha = min(alpha, textures[5].r); // since opacity texture is a B&W image, we can take r, g or b
 	}
-	if(alpha<0.1){
+	if(alpha<0.001){
 		discard;
 	}
     vec3 norm;
-    if(material.texture_normal){
+    if(false/*material.texture_normal*/){
         norm = textures[4].rgb;
         norm = normalize(norm * 2.0 - 1.0);
-        norm = normalize(vec4(norm, 1.0).xyz);
         norm = normalize(TBN * norm);
     }
     else

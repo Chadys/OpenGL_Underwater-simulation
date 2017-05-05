@@ -36,26 +36,9 @@ void Game::Init()
                                                  {"shaders/LIGHT.fs", "shaders/FOG.fs"}));
     shaders.push_back(ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text"));
     shaders.push_back(ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug"));
-    shaders.push_back(ResourceManager::LoadShader("shaders/particle.vs", "shaders/particle.fs", "shaders/particle.gs", "particle"));
+//    shaders.push_back(ResourceManager::LoadShader("shaders/particle.vs", "shaders/particle.fs", "shaders/particle.gs", "particle"));
 
-    // Configure shaders for value that won't change all throught the program
-    shaders[3].SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), GL_TRUE);
-    shaders[2].SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, GL_TRUE);
-    shaders[2].SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f, GL_TRUE);
-    shaders[2].SetVector3f("dirLight.diffuse", 0.3f, 0.4f, 0.5f, GL_TRUE);
-    shaders[2].SetVector3f("dirLight.specular", 0.4f, 0.5f, 0.7f, GL_TRUE);
-    for (const int i  : {0, 2}) {
-        shaders[i].SetInteger("fogParams.iEquation", FogParameters::iFogEquation, GL_TRUE);
-        shaders[i].SetVector4f("fogParams.vFogColor", FogParameters::vFogColor);
-        if(FogParameters::iFogEquation == FOG_EQUATION_LINEAR)
-        {
-            shaders[i].SetFloat("fogParams.fStart", FogParameters::fStart);
-            shaders[i].SetFloat("fogParams.fEnd", FogParameters::fEnd);
-        }
-        else
-            shaders[i].SetFloat("fogParams.fDensity", FogParameters::fDensity);
-    }
-
+    this->setConstantShadersUniforms(shaders);
 
     // Load textures
     // Floor
@@ -63,7 +46,7 @@ void Game::Init()
     Plane water_surface(glm::vec3(-size/2,-size*0.42,0), glm::vec2(size),
                 ResourceManager::LoadTexture("textures/Water_NormalMap.png", GL_FALSE, GL_TRUE, "water_normals"),
                 ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox"));
-    water_surface.Rotation.x=90;
+    water_surface.Rotation.x=-90;
     planes.push_back(water_surface);
 
     // Particle
@@ -135,9 +118,9 @@ void Game::Init()
     }
 
     // Set render-specific controls
-    Renderer.push_back(new Sprite_Renderer(shaders[0], 15.0f));
-    Renderer.push_back(new Sprite_Renderer(shaders[1]));
-    Renderer.push_back(new Sprite_Renderer(shaders[5], 0));
+    Renderer.push_back(new Sprite_Renderer(shaders[WATER-1], 1.0f));
+    Renderer.push_back(new Sprite_Renderer(shaders[SKYBOX-1]));
+//    Renderer.push_back(new Sprite_Renderer(shaders[PARTICLE-1], 0));
     T_Renderer = new Text_Renderer(this->Width, this->Height);
     T_Renderer->Load("./fonts/Futura_Bold_Font/a_FuturaOrto-Bold_2258.ttf",50);
 }
@@ -145,13 +128,17 @@ void Game::Init()
 /*------------------------------------UPDATE-----------------------------------------*/
 void Game::Update(GLfloat dt, GLfloat currenttime)
 {
-    Shader mshader = ResourceManager::GetShader("model");
+    Shader Mshader = ResourceManager::GetShader("model"), Wshader = ResourceManager::GetShader("water");
 
-    ResourceManager::GetShader("water").SetVector3f("viewPos", this->Cam.Position, GL_TRUE);
     this->State_manager.Update(dt);
-    this->State_manager.Active(mshader);
-    mshader.SetVector3f("viewPos", this->Cam.Position);
-    mshader.SetFloat("time", currenttime);
+
+    this->State_manager.Active(Wshader);
+    Wshader.SetVector3f("viewPos", this->Cam.Position);
+    Wshader.SetFloat("time", currenttime);
+
+    this->State_manager.Active(Mshader);
+    Mshader.SetVector3f("viewPos", this->Cam.Position);
+    Mshader.SetFloat("time", currenttime);
 
     for (GameModel &mod : this->models){
         mod.Update(dt);
@@ -222,6 +209,8 @@ void Game::Render()
     projection3D = glm::perspective(glm::radians(this->Cam.Zoom), static_cast<GLfloat>(this->Width)/static_cast<GLfloat>(this->Height), 0.1f, 1000.0f);
     projection2D = glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f);
 
+    //should be drawn at the end but other objects have transparency
+    Renderer[1]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
     for(GameModel &mod : this->models) {
         if(!mod.cullface)
             glDisable(GL_CULL_FACE);
@@ -231,9 +220,13 @@ void Game::Render()
         if(!mod.cullface)
             glEnable(GL_CULL_FACE);
     }
+    bool top_of_water = this->Cam.Position.y < 117;
+    if(top_of_water)
+        glCullFace(GL_FRONT);
     for(Plane &plane : this->planes)
         plane.Draw(this->State_manager, *Renderer[0], projection3D, view3D);
-    Renderer[1]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
+    if(top_of_water)
+        glCullFace(GL_BACK);
 }
 
 /*------------------------------------MISCELLANOUS-----------------------------------------*/
@@ -248,4 +241,24 @@ vector<string> Game::get_skybox(string path, string ext){
     faces.push_back(path+"bk"+ext);
     faces.push_back(path+"ft"+ext);
     return faces;
+}
+
+
+void Game::setConstantShadersUniforms(vector<Shader> &shaders){
+    // Configure shaders for value that won't change all throught the program
+    shaders[TEXT-1].SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), GL_TRUE);
+    for (const int i  : {MODEL-1, WATER-1}) {
+        shaders[i].SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, GL_TRUE);
+        shaders[i].SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        shaders[i].SetVector3f("dirLight.diffuse", 0.3f, 0.4f, 0.5f);
+        shaders[i].SetVector3f("dirLight.specular", 0.4f, 0.5f, 0.7f);
+        shaders[i].SetInteger("fogParams.iEquation", FogParameters::iFogEquation);
+        shaders[i].SetVector4f("fogParams.vFogColor", FogParameters::vFogColor);
+        if(FogParameters::iFogEquation == FOG_EQUATION_LINEAR) {
+            shaders[i].SetFloat("fogParams.fStart", FogParameters::fStart);
+            shaders[i].SetFloat("fogParams.fEnd", FogParameters::fEnd);
+        }
+        else
+            shaders[i].SetFloat("fogParams.fDensity", FogParameters::fDensity);
+    }
 }
