@@ -30,7 +30,7 @@ void Game::Init()
     // Load shaders
     vector<Shader> shaders;
     shaders.push_back(ResourceManager::LoadShader("./shaders/water.vs", "./shaders/water.fs", nullptr, "water",
-                                                  {"shaders/FOG.fs"}));
+                                                  {"shaders/LIGHT.fs", "shaders/FOG.fs"}));
     shaders.push_back(ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox"));
     shaders.push_back(ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "shaders/model.gs", "model",
                                                  {"shaders/LIGHT.fs", "shaders/FOG.fs"}));
@@ -220,7 +220,7 @@ void Game::Render()
         if(!mod.cullface)
             glEnable(GL_CULL_FACE);
     }
-    bool top_of_water = this->Cam.Position.y < 117;
+    bool top_of_water = this->Cam.Position.y < 118;
     if(top_of_water)
         glCullFace(GL_FRONT);
     for(Plane &plane : this->planes)

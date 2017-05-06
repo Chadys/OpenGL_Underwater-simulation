@@ -35,12 +35,15 @@ uniform Material material;
 void main(){
     all_EyeSpacePos = view * model * vec4(position, 1.0);
     gl_Position = projection * all_EyeSpacePos;
-    all_FragPos = vec3(model * vec4(position, 1.0f));
-    if(false/*material.texture_normal*/){
+    all_FragPos = (model * vec4(position, 1.0f)).xyz;
+    if(material.texture_normal){
         vec3 T = normalize((model * vec4(tangent, 0.0)).xyz);
         vec3 N = normalize((model * vec4(normal, 0.0))).xyz;
         vec3 B = cross(N, T);
         all_TBN = mat3(T, B, N);
+        all_Normal = normalize(vec3(vec4(transpose_inverse_viewmodel * normal, 1.0)));
+        if(position.x > 0)
+            all_Normal = -all_Normal;
     }
     else
         all_Normal = normalize(vec3(vec4(transpose_inverse_viewmodel * normal, 1.0)));
