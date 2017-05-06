@@ -51,11 +51,14 @@ private:
     vector<Sprite_Renderer*> Renderer;
     Text_Renderer            *T_Renderer;
     vector<Plane>            planes;
+    vector<Particle>         bubbles;
     vector<Text>             texts;
     std::vector<GameModel> 	 models;
 
     vector<string>           get_skybox(string path, string ext);
     void                     setConstantShadersUniforms(vector<Shader> &shaders);
+    void                     add_models();
+    void                     add_bubbles(Texture2D &tex, unsigned int n);
 };
 
 

@@ -21,11 +21,6 @@ void Game::Init()
 {
     //Adapt camera speed for 2D and depending on the screen size (it was originalled choosen for a 800x600 screen)
     this->Cam.MovementSpeed = 100.0f*this->Width/800;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dis(10,80);
-    std::uniform_int_distribution<int> dis2(0,1);
-    std::uniform_int_distribution<int> dis3(10,100);
 
     // Load shaders
     vector<Shader> shaders;
@@ -36,91 +31,30 @@ void Game::Init()
                                                  {"shaders/LIGHT.fs", "shaders/FOG.fs"}));
     shaders.push_back(ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text"));
     shaders.push_back(ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug"));
-//    shaders.push_back(ResourceManager::LoadShader("shaders/particle.vs", "shaders/particle.fs", "shaders/particle.gs", "particle"));
+    shaders.push_back(ResourceManager::LoadShader("shaders/particle.vs", "shaders/particle.fs", "shaders/particle.gs", "particle"));
 
     this->setConstantShadersUniforms(shaders);
 
     // Load textures
     // Floor
-    GLfloat size(1500);
-    Plane water_surface(glm::vec3(-size/2,-size*0.42,0), glm::vec2(size),
+    GLfloat size(2000);
+    Plane water_surface(glm::vec3(-size/2,-size*0.45,0), glm::vec2(size),
                 ResourceManager::LoadTexture("textures/Water_NormalMap.png", GL_FALSE, GL_TRUE, "water_normals"),
                 ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox"));
     water_surface.Rotation.x=-90;
     planes.push_back(water_surface);
 
     // Particle
-    ResourceManager::LoadTexture("textures/bubble.png", GL_TRUE, GL_FALSE, "bubble");
+    Texture2D bubble_tex = ResourceManager::LoadTexture("textures/bubble.png", GL_TRUE, GL_FALSE, "bubble");
+    this->add_bubbles(bubble_tex, 20);
 
     // Models
-    GameModel mod = GameModel("models3D/shark/Model_D0202004/wshark.obj", "shark");
-    mod.Rotation.y = 270;
-    mod.Size = glm::vec3(0.005);
-    mod.Position = glm::vec3(50,0,-50);
-    mod.centerpoint = glm::vec3(100, 0, 100);
-    mod.speed = 20;
-    mod.deformation_magnitude = 1.0;
-    this->models.push_back(mod);
-    mod = GameModel("models3D/phenix_nocullface/Model_C1018410/fenghuang5.obj", "phenix");
-    mod.Size = glm::vec3(0.1);
-    mod.centerpoint = glm::vec3(50, 250, 0);
-    mod.starting_height = 250;
-    mod.outline = false;
-    mod.cullface = false;
-    mod.wings = true;
-    mod.deformation_magnitude = 0.1;
-    this->models.push_back(mod);
-    mod = GameModel("models3D/hummingbird/hummingbird.obj", "hummingbird");
-    mod.Size = glm::vec3(0.01);
-    mod.Position = glm::vec3(50,150,-20);
-    mod.starting_height = 150;
-    mod.centerpoint = glm::vec3(50,150,-140);
-    mod.speed = -60;
-    mod.Rotation.y = -90;
-    mod.outline = false;
-    mod.wings = true;
-    mod.deformation_magnitude = 0.007;
-    this->models.push_back(mod);
-    mod = GameModel("models3D/ray/something_01.obj", "ray");
-    mod.Rotation = glm::vec3(290, 30, -30);
-    mod.Size = glm::vec3(0.05);
-    mod.Position = glm::vec3(-20,20,-20);
-    mod.starting_height = 20;
-    mod.centerpoint = glm::vec3(0,20,-20);
-    mod.speed = -30;
-    mod.wings = true;
-    mod.deformation_magnitude = 0.03;
-    this->models.push_back(mod);
-    for (char i = '0', max = '9'; i <= '1'; ++i, max='5') {
-        for (int j = '1'; j <= max; ++j) {
-            string filename("models3D/Tropical Fish Pack/TropicalFish"), name("fish");
-            filename+=i;
-            filename+=j;
-            filename+=".obj";
-            name+=i;
-            name+=j;
-            mod = GameModel(filename, name);
-            mod.deformation_magnitude = 0.8;
-            mod.Size = glm::vec3(0.02);
-            mod.Position = glm::vec3(0, 0, dis(gen));
-            mod.starting_height = dis(gen);
-            mod.centerpoint = mod.Position;
-            mod.speed = dis3(gen);
-            mod.centerpoint.z += -30;
-            if(dis2(gen)){
-                mod.Rotation.y = -90;
-                mod.speed = -mod.speed;
-            }
-            else
-                mod.Rotation.y = 90;
-            this->models.push_back(mod);
-        }
-    }
+    this->add_models();
 
     // Set render-specific controls
     Renderer.push_back(new Sprite_Renderer(shaders[WATER-1], 1.0f));
     Renderer.push_back(new Sprite_Renderer(shaders[SKYBOX-1]));
-//    Renderer.push_back(new Sprite_Renderer(shaders[PARTICLE-1], 0));
+    Renderer.push_back(new Sprite_Renderer(shaders[PARTICLE-1], 0));
     T_Renderer = new Text_Renderer(this->Width, this->Height);
     T_Renderer->Load("./fonts/Futura_Bold_Font/a_FuturaOrto-Bold_2258.ttf",50);
 }
@@ -128,7 +62,9 @@ void Game::Init()
 /*------------------------------------UPDATE-----------------------------------------*/
 void Game::Update(GLfloat dt, GLfloat currenttime)
 {
-    Shader Mshader = ResourceManager::GetShader("model"), Wshader = ResourceManager::GetShader("water");
+    Shader Mshader = ResourceManager::GetShader("model"),
+            Wshader = ResourceManager::GetShader("water"),
+            Pshader = ResourceManager::GetShader("particle");
 
     this->State_manager.Update(dt);
 
@@ -140,9 +76,15 @@ void Game::Update(GLfloat dt, GLfloat currenttime)
     Mshader.SetVector3f("viewPos", this->Cam.Position);
     Mshader.SetFloat("time", currenttime);
 
+    this->State_manager.Active(Pshader);
+    Pshader.SetVector3f("cam_up", this->Cam.Up);
+    Pshader.SetVector3f("cam_right", this->Cam.Right);
+
     for (GameModel &mod : this->models){
         mod.Update(dt);
     }
+    for (Particle p : this->bubbles)
+        p.Update(dt, currenttime);
 }
 
 /*------------------------------------PROCESSORS-----------------------------------------*/
@@ -206,7 +148,7 @@ void Game::Render()
     // Create camera transformation
     glm::mat4 view3D, projection3D, projection2D;
     view3D = this->Cam.GetViewMatrix();
-    projection3D = glm::perspective(glm::radians(this->Cam.Zoom), static_cast<GLfloat>(this->Width)/static_cast<GLfloat>(this->Height), 0.1f, 1000.0f);
+    projection3D = glm::perspective(glm::radians(this->Cam.Zoom), static_cast<GLfloat>(this->Width)/static_cast<GLfloat>(this->Height), 0.1f, 1750.0f);
     projection2D = glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f);
 
     //should be drawn at the end but other objects have transparency
@@ -220,13 +162,15 @@ void Game::Render()
         if(!mod.cullface)
             glEnable(GL_CULL_FACE);
     }
-    bool top_of_water = this->Cam.Position.y < 118;
+    bool top_of_water = this->Cam.Position.y < 117;
     if(top_of_water)
         glCullFace(GL_FRONT);
     for(Plane &plane : this->planes)
         plane.Draw(this->State_manager, *Renderer[0], projection3D, view3D);
     if(top_of_water)
         glCullFace(GL_BACK);
+    for(Particle &p : this->bubbles)
+        p.Draw(this->State_manager, *Renderer[2], projection3D, view3D);
 }
 
 /*------------------------------------MISCELLANOUS-----------------------------------------*/
@@ -260,5 +204,85 @@ void Game::setConstantShadersUniforms(vector<Shader> &shaders){
         }
         else
             shaders[i].SetFloat("fogParams.fDensity", FogParameters::fDensity);
+    }
+    shaders[PARTICLE-1].SetInteger("bubble", 0);
+}
+
+void Game::add_models() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dis(10,80);
+    std::uniform_int_distribution<int> dis2(0,1);
+    std::uniform_int_distribution<int> dis3(10,100);
+
+    GameModel mod = GameModel("models3D/shark/Model_D0202004/wshark.obj", "shark");
+    mod.Rotation.y = 270;
+    mod.Size = glm::vec3(0.005);
+    mod.Position = glm::vec3(50,0,-50);
+    mod.centerpoint = glm::vec3(100, 0, 100);
+    mod.speed = 20;
+    mod.deformation_magnitude = 1.0;
+    this->models.push_back(mod);
+    mod = GameModel("models3D/phenix_nocullface/Model_C1018410/fenghuang5.obj", "phenix");
+    mod.Size = glm::vec3(0.1);
+    mod.centerpoint = glm::vec3(50, 250, 0);
+    mod.starting_height = 250;
+    mod.outline = false;
+    mod.cullface = false;
+    mod.wings = true;
+    mod.deformation_magnitude = 0.1;
+    this->models.push_back(mod);
+    mod = GameModel("models3D/hummingbird/hummingbird.obj", "hummingbird");
+    mod.Size = glm::vec3(0.01);
+    mod.Position = glm::vec3(50,150,-20);
+    mod.starting_height = 150;
+    mod.centerpoint = glm::vec3(50,150,-140);
+    mod.speed = -60;
+    mod.Rotation.y = -90;
+    mod.outline = false;
+    mod.wings = true;
+    mod.deformation_magnitude = 0.007;
+    this->models.push_back(mod);
+    mod = GameModel("models3D/ray/something_01.obj", "ray");
+    mod.Rotation = glm::vec3(290, 30, -30);
+    mod.Size = glm::vec3(0.05);
+    mod.Position = glm::vec3(-20,20,-20);
+    mod.starting_height = 20;
+    mod.centerpoint = glm::vec3(0,20,-20);
+    mod.speed = -30;
+    mod.wings = true;
+    mod.deformation_magnitude = 0.03;
+    this->models.push_back(mod);
+    for (char i = '0', max = '9'; i <= '1'; ++i, max='5') {
+        for (int j = '1'; j <= max; ++j) {
+            string filename("models3D/Tropical Fish Pack/TropicalFish"), name("fish");
+            filename+=i;
+            filename+=j;
+            filename+=".obj";
+            name+=i;
+            name+=j;
+            mod = GameModel(filename, name);
+            mod.deformation_magnitude = 0.8;
+            mod.Size = glm::vec3(0.02);
+            mod.Position = glm::vec3(0, 0, dis(gen));
+            mod.starting_height = dis(gen);
+            mod.centerpoint = mod.Position;
+            mod.speed = dis3(gen);
+            mod.centerpoint.z += -30;
+            if(dis2(gen)){
+                mod.Rotation.y = -90;
+                mod.speed = -mod.speed;
+            }
+            else
+                mod.Rotation.y = 90;
+            this->models.push_back(mod);
+        }
+    }
+}
+
+void Game::add_bubbles(Texture2D &tex, unsigned int n){
+    n=1;
+    for (int i = 0; i < n ; ++i) {
+        this->bubbles.emplace_back(glm::vec3(0,0,-50), glm::vec2(0.5), tex, glm::vec3(0,10,0), 10000);
     }
 }

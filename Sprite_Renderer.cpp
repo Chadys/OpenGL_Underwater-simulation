@@ -173,19 +173,23 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture2D &normal
 }
 
 // PARTICULE
-void Sprite_Renderer::DrawSprite(State_Manager &manager, glm::vec2 position, glm::mat4 projection, glm::mat4 view)
+void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture2D &tex, glm::vec3 position, glm::vec2 size, glm::mat4 projection, glm::mat4 view)
 {
     //Prepare transformations
     manager.Active(this->shader);
     glm::mat4 model;
-    model = glm::translate(model, glm::vec3(position,0.0f));
+    model = glm::translate(model, glm::vec3(position));
 
     this->shader.SetMatrix4("model", model);
     this->shader.SetMatrix4("view", view);
     this->shader.SetMatrix4("projection", projection);
+    this->shader.SetVector2f("Billboard_Size", size);
+
+    glActiveTexture(GL_TEXTURE0);
+    manager.ActiveTex2D(tex);
 
     glBindVertexArray(this->quadVAO);
-    glDrawArrays(GL_POINT, 0, 1);
+    glDrawArrays(GL_POINTS, 0, 1);
     glBindVertexArray(0);
 }
 

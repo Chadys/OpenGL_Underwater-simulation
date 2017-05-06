@@ -55,7 +55,8 @@ public:
     Texture3D   Reflect;
     // Constructor(s)
     Plane(glm::vec3 pos, glm::vec2 size, Texture2D normals, Texture3D reflect);
-    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
+    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer,
+                      glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
 
 };
 
@@ -66,13 +67,16 @@ class Particle : public GameObject
 {
 public:
     // Object state
-    glm::vec2   Position;
+    glm::vec3   Position, Starting_pos, Velocity;
+    glm::vec2   Size;
     float       Decay;
 
     // Constructor(s)
-    Particle(glm::vec2 position, Texture2D tex, float decay = 1000);
+    Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity = glm::vec3(0), float decay = 1000);
     // Draw sprite
-    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
+    virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer,
+                      glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
+    void Update(GLfloat dt, GLfloat currenttime);
 };
 
 

@@ -5,16 +5,29 @@
 #include "Game_Object.h"
 #include "Resource_Manager.h"
 
+//-----------------Particle
 
-Particle::Particle(glm::vec2 position, Texture2D tex, float decay)
-        : GameObject(tex), Position(position), Decay(decay) { }
+Particle::Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity, float decay)
+        : GameObject(tex), Position(position), Starting_pos(position), Size(size), Velocity(velocity), Decay(decay) { }
 
-void Particle::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection, glm::mat4 view)
-{
-    renderer.DrawSprite(manager, this->Position, projection, view);
+void Particle::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection, glm::mat4 view) {
+    renderer.DrawSprite(manager, this->Tex, this->Position, this->Size, projection, view);
 }
 
- //-----------------
+void Particle::Update(GLfloat dt, GLfloat currenttime){
+    this->Position += this->Velocity*dt;
+    this->Decay -= dt;
+    if(this->Decay<0)
+        this->Decay = 0;
+    if(this->Velocity.y > 0){
+        this->Position.x = this->Starting_pos.x+(glm::sin(currenttime * this->Velocity.y));
+    }
+    else{
+        this->Position.y = this->Starting_pos.y+(glm::sin(currenttime * (this->Velocity.x+this->Velocity.z)));
+    }
+}
+
+//-----------------Plane
 
 Plane::Plane(glm::vec3 pos, glm::vec2 size, Texture2D normals, Texture3D reflect)
         : GameObject(normals), Position(pos), Size(size), Reflect(reflect) {
@@ -26,7 +39,7 @@ void Plane::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 pr
     renderer.DrawSprite(manager, this->Tex, this->Reflect, this->Position, this->Size, this->Rotation, projection, view);
 }
 
-//-----------------
+//-----------------Model
 
 GameModel::GameModel(std::string file, std::string name)
         : Game_Object3D(glm::vec3(0), glm::vec3(1), glm::vec3(0.0f,0.0f,1.0f)), // The color here is stocked in HSV format
