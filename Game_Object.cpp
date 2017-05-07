@@ -6,6 +6,7 @@
 #include "Resource_Manager.h"
 
 //-----------------Particle
+float Particle::NO_DECAY = FLT_MAX;
 
 Particle::Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity, float decay)
         : GameObject(tex), Position(position), Starting_pos(position), Size(size), Velocity(velocity), Decay(decay) { }
@@ -16,9 +17,8 @@ void Particle::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4
 
 void Particle::Update(GLfloat dt, GLfloat currenttime){
     this->Position += this->Velocity*dt;
-    this->Decay -= dt;
-    if(this->Decay<0)
-        this->Decay = 0;
+    if(this->Decay != NO_DECAY)
+        this->Decay -= dt;
     if(this->Velocity.y > 0){
         this->Position.x = this->Starting_pos.x+(glm::sin(currenttime * this->Velocity.y));
     }
@@ -55,40 +55,4 @@ void GameModel::Draw(State_Manager &manager, Shader shader, glm::mat4 projection
 void GameModel::Update(GLfloat dt){
     this->whirlpooling += dt*this->speed;
     this->Position.y = this->starting_height+(glm::sin(0.2f*this->whirlpooling)*glm::pi<float>());
-}
-
-// Set the model in the correct position depending on its bounds so that the specified side of it is at the pos coordinate
-void GameModel::SetSide(GLfloat pos, Side side_local, Side side_model){
-    GLfloat newpos;
-    switch(side_model){
-        case UP_SIDE :
-            newpos = pos-(this->model.Span_udb.x*this->Size.y);
-            break;
-        case DOWN_SIDE :
-            newpos = pos-(this->model.Span_udb.y*this->Size.y);
-            break;
-        case FRONT_SIDE :
-            newpos = pos-(this->model.Span_lrf.z*this->Size.x);
-            break;
-        case BACK_SIDE :
-            newpos = pos-(this->model.Span_udb.z*this->Size.x);
-            break;
-        case LEFT_SIDE :
-            newpos = pos-(this->model.Span_lrf.x*this->Size.z);
-            break;
-        default : //RIGHT_SIDE
-            newpos = pos-(this->model.Span_lrf.y*this->Size.z);
-    }
-    switch(side_local){
-        case UP_SIDE :
-        case DOWN_SIDE :
-            this->Position.y = newpos;
-            break;
-        case FRONT_SIDE :
-        case BACK_SIDE :
-            this->Position.x = newpos;
-            break;
-        default :
-            this->Position.z = newpos;
-    }
 }

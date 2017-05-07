@@ -67,12 +67,13 @@ class Particle : public GameObject
 {
 public:
     // Object state
-    glm::vec3   Position, Starting_pos, Velocity;
-    glm::vec2   Size;
-    float       Decay;
+    glm::vec3    Position, Starting_pos, Velocity;
+    glm::vec2    Size;
+    float        Decay;
+    static float NO_DECAY;
 
     // Constructor(s)
-    Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity = glm::vec3(0), float decay = 1000);
+    Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity = glm::vec3(0), float decay = NO_DECAY);
     // Draw sprite
     virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer,
                       glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
@@ -81,16 +82,6 @@ public:
 
 
 /*------------------------------------MODEL CONTAINER-----------------------------------------*/
-
-// Represents the different sides of a model
-enum Side {
-    UP_SIDE,
-    DOWN_SIDE,
-    FRONT_SIDE,
-    BACK_SIDE,
-    LEFT_SIDE,
-    RIGHT_SIDE
-};
 
 // class regrouping property of a 3D model
 class GameModel : public Game_Object3D
@@ -106,11 +97,6 @@ public:
     // Draw sprite
     void Draw(State_Manager &manager, Shader shader, glm::mat4 projection, glm::mat4 view);
     void Update(GLfloat dt);
-    // Set model's position correctly :
-    // the given side of the model will be localised as to be at pos location if it is facing the orientation side_local
-    // Putting the model in its correct orientation for it to work will need to be done elsewhere.
-    void SetSide(GLfloat pos, Side side_local, Side side_model);
-    void SetSide(GLfloat pos, Side side_local) { SetSide(pos, side_local, side_local); }
 };
 
 #endif //PREPROJET_OBJECT_H

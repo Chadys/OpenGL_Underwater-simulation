@@ -55,6 +55,7 @@ float getFogFactor(FogParameters params, float fFogCoord);
 void main(){
 	vec3 Normal = waveNormal(Position);
     float ratio = 1.00 / 1.33; //water refractive index
+    vec4 color;
 
     vec3 I = normalize(Position - viewPos);
     vec3 R = reflect(I, Normal);
@@ -62,9 +63,9 @@ void main(){
     R = refract(I, Normal, ratio);
     vec4 distord_color = texture(skybox, R);
     // Mix refraction and reflection
-    fragcolor = mix(mirror_color, distord_color, 0.8);
+    color = mix(mirror_color, distord_color, 0.8);
     //Add water color
-    fragcolor = mix(vec4(water_color, 1), distord_color, 0.3);
+    color = mix(vec4(water_color, 1), distord_color, 0.3);
     // Add fog
     float fFogCoord = abs(FogDist.z);
     float alpha = max(0.9 - getFogFactor(fogParams, fFogCoord), 0.0);
@@ -72,7 +73,8 @@ void main(){
     vec3 viewDir = normalize(viewPos - Position);
     DirLight dirLight_ = dirLight;
     dirLight_.diffuse = dirLight.diffuse*1.5;
-    fragcolor = vec4(CalcDirLight(dirLight_, 128.0, Normal, viewDir, fragcolor), alpha);
+    fragcolor = vec4(CalcDirLight(dirLight_, 128.0, Normal, viewDir, color), alpha);
+    //fragcolor+=color;
 
     fragcolor = fragcolor*fade;
     if (fragcolor.a < 0.0001)

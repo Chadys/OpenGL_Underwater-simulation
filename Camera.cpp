@@ -5,7 +5,6 @@
 ** Taken and adapted from learnopengl.com (camera tutorial)
 ******************************************************************/
 
-#include <iostream>
 #include "Camera.h"
 
 
@@ -46,9 +45,6 @@ void Camera::ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime)
         this->Position -= this->Up * velocity;
     if (direction == DOWN)
         this->Position += this->Up * velocity;
-    // Make sure the user don't go bellow the ground level
-    if (this->Position.y < 0.0f)
-        this->Position.y = 0.0f;
 }
 
 void Camera::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch)
@@ -86,9 +82,9 @@ void Camera::updateCameraVectors()
 {
     // Calculate the new Front vector
     glm::vec3 front;
-    front.x = cos(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
-    front.y = sin(glm::radians(this->Pitch));
-    front.z = sin(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
+    front.x = static_cast<float>(cos(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch)));
+    front.y = static_cast<float>(sin(glm::radians(this->Pitch)));
+    front.z = static_cast<float>(sin(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch)));
     this->Front = glm::normalize(front);
     // Also re-calculate the Right and Up vector
     this->Right = glm::normalize(glm::cross(this->Front, this->WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
@@ -106,8 +102,8 @@ bool Camera::in_frustrum_square(glm::mat4 MVP){
 
 bool Camera::in_frustrum_point(glm::mat4 MVP, glm::vec4 p){
     glm::vec4 Pclip = MVP * p;
-    return (abs(Pclip.x) < Pclip.w &&
-              abs(Pclip.y) < Pclip.w &&
+    return (fabs(Pclip.x) < Pclip.w &&
+              fabs(Pclip.y) < Pclip.w &&
               0 < Pclip.z &&
               Pclip.z < Pclip.w);
 }

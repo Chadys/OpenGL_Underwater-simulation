@@ -14,12 +14,8 @@
 // GLFW
 #include <GLFW/glfw3.h>
 
-// SDL_Mixer
-#include <SDL/SDL_mixer.h>
-
 // My includes
 #include "Game.h"
-#include "Resource_Manager.h"
 
 // Function prototypes
 void sigint_handler(int sig);
@@ -46,8 +42,8 @@ int main (int argc, char *argv[])
     const GLFWvidmode* primary_mode;
     primary = glfwGetPrimaryMonitor();
     primary_mode = glfwGetVideoMode(primary);
-    game.Width=primary_mode->width;
-    game.Height=primary_mode->height;
+    game.Width=static_cast<GLuint>(primary_mode->width);
+    game.Height=static_cast<GLuint>(primary_mode->height);
 
     // Window
     GLFWwindow* window = glfwCreateWindow(game.Width, game.Height, "Underwater exploration", glfwGetPrimaryMonitor(), nullptr); // Windowed
@@ -63,7 +59,7 @@ int main (int argc, char *argv[])
     glfwSetScrollCallback(window, scroll_callback);
 
     // Options
-//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Initialize GLEW to setup the OpenGL Function pointers
     glewExperimental = GL_TRUE;
@@ -78,7 +74,7 @@ int main (int argc, char *argv[])
     glLineWidth(game.Height/160);
 
     // Time variables
-    GLfloat deltaTime = 0.0f;
+    GLfloat deltaTime;
     GLfloat lastFrame = 0.0f;
 
 
@@ -90,7 +86,7 @@ int main (int argc, char *argv[])
     {
         printFps();
         // Set frame time
-        GLfloat currentFrame = glfwGetTime();
+        GLfloat currentFrame = static_cast<GLfloat>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         glfwPollEvents();
@@ -148,7 +144,7 @@ void printFps(void){
     float t;
     static float t0=0,f= 0;
     f++;
-    t = glfwGetTime();
+    t = static_cast<float>(glfwGetTime());
     if(t - t0 > 2.000) {
         printf("%f\n", (f / (t - t0)));
         t0 = t;

@@ -54,6 +54,7 @@ private:
     vector<Particle>         bubbles;
     vector<Text>             texts;
     std::vector<GameModel> 	 models;
+    std::mt19937		     gen;
 
     vector<string>           get_skybox(string path, string ext);
     void                     setConstantShadersUniforms(vector<Shader> &shaders);

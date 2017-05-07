@@ -7,7 +7,8 @@
 
 /*------------------------------------CONSTRUCTOR/DESTRUCTOR-----------------------------------------*/
 Game::Game()
-        : Keys(), ProcessedKeys(), Cam(glm::vec3(0.0f, 0.0f, 0.0f)), lastX(0), lastY(0), firstMouse(GL_TRUE), DEBUG(GL_FALSE) {}
+        : Keys(), ProcessedKeys(), Cam(glm::vec3(0.0f, 0.0f, 0.0f)), lastX(0), lastY(0),
+          firstMouse(GL_TRUE), DEBUG(GL_FALSE), gen(std::random_device()()) {}
 
 Game::~Game()
 {
@@ -65,6 +66,8 @@ void Game::Update(GLfloat dt, GLfloat currenttime)
     Shader Mshader = ResourceManager::GetShader("model"),
             Wshader = ResourceManager::GetShader("water"),
             Pshader = ResourceManager::GetShader("particle");
+    std::uniform_int_distribution<unsigned int> proba_new_bubble(0, 50);
+    std::uniform_int_distribution<unsigned int> nb_new_bubble(1, 5);
 
     this->State_manager.Update(dt);
 
@@ -83,8 +86,17 @@ void Game::Update(GLfloat dt, GLfloat currenttime)
     for (GameModel &mod : this->models){
         mod.Update(dt);
     }
-    for (Particle p : this->bubbles)
-        p.Update(dt, currenttime);
+    for (auto it = this->bubbles.begin(); it != this->bubbles.end() ;) {
+        it->Update(dt, currenttime);
+        if (it->Decay <= 0 || it->Position.y > 90)
+            it = this->bubbles.erase(it);
+        else
+            it++;
+    }
+    if(!proba_new_bubble(this->gen)){
+        Texture2D tex_bubble = ResourceManager::GetTexture("bubble");
+        this->add_bubbles(tex_bubble, nb_new_bubble(this->gen));
+    }
 }
 
 /*------------------------------------PROCESSORS-----------------------------------------*/
@@ -113,7 +125,6 @@ void Game::ProcessInput(GLfloat dt)
         this->ProcessedKeys[GLFW_KEY_G] = GL_TRUE;
         this->DEBUG = !this->DEBUG;
     }
-    // Turbo
     if(this->Keys[GLFW_KEY_SPACE] && !this->ProcessedKeys[GLFW_KEY_SPACE]){
     }
 }
@@ -162,7 +173,7 @@ void Game::Render()
         if(!mod.cullface)
             glEnable(GL_CULL_FACE);
     }
-    bool top_of_water = this->Cam.Position.y < 117;
+    bool top_of_water = this->Cam.Position.y < 100;
     if(top_of_water)
         glCullFace(GL_FRONT);
     for(Plane &plane : this->planes)
@@ -205,12 +216,9 @@ void Game::setConstantShadersUniforms(vector<Shader> &shaders){
         else
             shaders[i].SetFloat("fogParams.fDensity", FogParameters::fDensity);
     }
-    shaders[PARTICLE-1].SetInteger("bubble", 0);
 }
 
 void Game::add_models() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
     std::uniform_int_distribution<int> dis(10,80);
     std::uniform_int_distribution<int> dis2(0,1);
     std::uniform_int_distribution<int> dis3(10,100);
@@ -264,12 +272,12 @@ void Game::add_models() {
             mod = GameModel(filename, name);
             mod.deformation_magnitude = 0.8;
             mod.Size = glm::vec3(0.02);
-            mod.Position = glm::vec3(0, 0, dis(gen));
-            mod.starting_height = dis(gen);
+            mod.Position = glm::vec3(0, 0, dis(this->gen));
+            mod.starting_height = dis(this->gen);
             mod.centerpoint = mod.Position;
-            mod.speed = dis3(gen);
+            mod.speed = dis3(this->gen);
             mod.centerpoint.z += -30;
-            if(dis2(gen)){
+            if(dis2(this->gen)){
                 mod.Rotation.y = -90;
                 mod.speed = -mod.speed;
             }
@@ -281,8 +289,13 @@ void Game::add_models() {
 }
 
 void Game::add_bubbles(Texture2D &tex, unsigned int n){
-    n=1;
+    std::uniform_real_distribution<float> disZ(0.1, 500);
+    std::uniform_int_distribution<int> disX(-(this->Width/2), this->Width/2);
+
     for (int i = 0; i < n ; ++i) {
-        this->bubbles.emplace_back(glm::vec3(0,0,-50), glm::vec2(0.5), tex, glm::vec3(0,10,0), 10000);
+        glm::vec3 pos = glm::vec3(this->Cam.Position)+(this->Cam.Front*disZ(this->gen));
+        pos.x+=disX(this->gen);
+        pos.y -= 200;
+        this->bubbles.emplace_back(pos, glm::vec2(3), tex, glm::vec3(0,10,0));
     }
 }

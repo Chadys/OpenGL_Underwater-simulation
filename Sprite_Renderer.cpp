@@ -131,11 +131,11 @@ void Sprite_Renderer::initPosRenderData()
     glBindVertexArray(this->quadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    GLfloat vertice[] = { 0.0f, 0.0f };
+    GLfloat vertice[] = { 0.0f, 0.0f, 0.0f };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertice), &vertice, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -178,7 +178,7 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture2D &tex, g
     //Prepare transformations
     manager.Active(this->shader);
     glm::mat4 model;
-    model = glm::translate(model, glm::vec3(position));
+    model = glm::translate(model, position);
 
     this->shader.SetMatrix4("model", model);
     this->shader.SetMatrix4("view", view);
