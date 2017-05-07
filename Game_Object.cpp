@@ -48,8 +48,10 @@ GameModel::GameModel(std::string file, std::string name)
 }
 
 void GameModel::Draw(State_Manager &manager, Shader shader, glm::mat4 projection, glm::mat4 view){
-    this->model.Draw(manager, shader, this->Position, this->Size, this->Rotation, this->Color, this->Alpha,
-                     this->outline, this->wings, this->deformation_magnitude, this->whirlpooling, this->centerpoint, projection, view);
+    this->Last_true_pos = this->New_true_pos;
+    this->New_true_pos = this->model.Draw(manager, shader, this->Position, this->Size, this->Rotation,
+                                          this->Color, this->Alpha, this->outline, this->wings, this->deformation_magnitude,
+                                          this->whirlpooling, this->centerpoint, projection, view);
 }
 
 void GameModel::Update(GLfloat dt){

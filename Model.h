@@ -31,7 +31,7 @@ public:
     Model();
 
     // Draws the model, and thus all its meshes
-    void Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
+    glm::mat4 Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
               glm::vec3 color, GLfloat alpha, bool outline, bool wings, float deformation_magnitude,
               GLfloat whirlpooling, glm::vec3 centerpoint, glm::mat4 projection, glm::mat4 view);
 

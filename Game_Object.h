@@ -92,6 +92,7 @@ public:
     bool        outline, cullface, wings;
     GLfloat     whirlpooling, speed, starting_height, deformation_magnitude;
     glm::vec3   centerpoint;
+    glm::mat4   Last_true_pos, New_true_pos;
     // Constructor(s)
     GameModel(std::string file, std::string name);
     // Draw sprite

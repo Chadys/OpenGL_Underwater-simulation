@@ -61,16 +61,20 @@ void Game::Init()
 }
 
 /*------------------------------------UPDATE-----------------------------------------*/
-void Game::Update(GLfloat dt, GLfloat currenttime)
-{
+void Game::Update(GLfloat dt, GLfloat currenttime) {
+    static double bubble_count_down = 0;
+
     Shader Mshader = ResourceManager::GetShader("model"),
             Wshader = ResourceManager::GetShader("water"),
             Pshader = ResourceManager::GetShader("particle");
-    std::uniform_int_distribution<unsigned int> proba_new_bubble(0, 50);
-    std::uniform_int_distribution<unsigned int> nb_new_bubble(1, 5);
+    std::uniform_int_distribution<unsigned int> proba_new_bubble(0, 30);
+    std::uniform_int_distribution<unsigned int> nb_new_fish_bubble(1, 3);
+    Texture2D tex_bubble = ResourceManager::GetTexture("bubble");
+    bool new_bubble;
 
     this->State_manager.Update(dt);
 
+    //Add value specific to the game to shaders
     this->State_manager.Active(Wshader);
     Wshader.SetVector3f("viewPos", this->Cam.Position);
     Wshader.SetFloat("time", currenttime);
@@ -83,9 +87,18 @@ void Game::Update(GLfloat dt, GLfloat currenttime)
     Pshader.SetVector3f("cam_up", this->Cam.Up);
     Pshader.SetVector3f("cam_right", this->Cam.Right);
 
+    new_bubble = bubble_count_down < currenttime;
+    //Update models and Create fishes's bubble trail
     for (GameModel &mod : this->models){
         mod.Update(dt);
+        if (!mod.wings && new_bubble){
+            this->add_trailing_bubbles(tex_bubble, mod, nb_new_fish_bubble(this->gen));
+        }
     }
+    if(new_bubble)
+        bubble_count_down+=0.3;
+
+    //Update bubbles, destroy if need be and create new ones
     for (auto it = this->bubbles.begin(); it != this->bubbles.end() ;) {
         it->Update(dt, currenttime);
         if (it->Decay <= 0 || it->Position.y > 90)
@@ -94,8 +107,7 @@ void Game::Update(GLfloat dt, GLfloat currenttime)
             it++;
     }
     if(!proba_new_bubble(this->gen)){
-        Texture2D tex_bubble = ResourceManager::GetTexture("bubble");
-        this->add_bubbles(tex_bubble, nb_new_bubble(this->gen));
+        this->add_bubbles(tex_bubble, 1);
     }
 }
 
@@ -296,6 +308,18 @@ void Game::add_bubbles(Texture2D &tex, unsigned int n){
         glm::vec3 pos = glm::vec3(this->Cam.Position)+(this->Cam.Front*disZ(this->gen));
         pos.x+=disX(this->gen);
         pos.y -= 200;
-        this->bubbles.emplace_back(pos, glm::vec2(3), tex, glm::vec3(0,10,0));
+        this->bubbles.emplace_back(pos, glm::vec2(1), tex, glm::vec3(0,10,0));
+    }
+}
+
+void Game::add_trailing_bubbles(Texture2D &tex, GameModel &mod, unsigned int n){
+    std::uniform_real_distribution<float> dis(-3, 3);
+
+    for (int i = 0; i < n ; ++i) {
+        glm::vec3 tmp = glm::vec3(mod.Last_true_pos * glm::vec4(mod.Position, 1.0));
+        glm::vec3 pos = tmp + glm::vec3(dis(this->gen), dis(this->gen), dis(this->gen));
+        glm::vec3 vel = (tmp - glm::vec3(mod.New_true_pos * glm::vec4(mod.Position, 1.0))) * glm::vec3(100);
+        vel.y += dis(this->gen);
+        this->bubbles.emplace_back(pos, glm::vec2(0.5), tex, vel, 0.5);
     }
 }

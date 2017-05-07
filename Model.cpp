@@ -6,16 +6,7 @@
 /*******************************************************************
 ** Taken and adapted from learnopengl.com (loading model tutorial)
 ******************************************************************/
-// Std. Includes
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-// GL Includes
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
 
 #include "Model.h"
 #include "Resource_Manager.h"
@@ -24,7 +15,7 @@
 Model::Model()
         : Span_lrf(0), Span_udb(0) { }
 // Draws the model, and thus all its meshes
-void Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
+glm::mat4 Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 rotation,
                  glm::vec3 color, GLfloat alpha, bool outline, bool wings, float deformation_magnitude,
                  GLfloat whirlpooling, glm::vec3 centerpoint, glm::mat4 projection, glm::mat4 view)
 {
@@ -53,14 +44,9 @@ void Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position, glm:
 
     for(GLuint i = 0; i < this->meshes.size(); i++)
         this->meshes[i].Draw(shader, outline);
+    return model;
 }
 
-
-/*  Model Data  */
-
-vector<Mesh> meshes;
-string directory;
-vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 
 /*  Functions   */
 
@@ -182,7 +168,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
         aiString str;
         mat->GetTexture(type, i, &str);
         // Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-        GLboolean skip = false;
+        bool skip = false;
         for(GLuint j = 0; j < textures_loaded.size(); j++)
         {
             if(textures_loaded[j].path == str)

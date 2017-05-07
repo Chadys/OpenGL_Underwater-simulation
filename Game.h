@@ -60,6 +60,7 @@ private:
     void                     setConstantShadersUniforms(vector<Shader> &shaders);
     void                     add_models();
     void                     add_bubbles(Texture2D &tex, unsigned int n);
+    void                     add_trailing_bubbles(Texture2D &tex, GameModel &mod, unsigned int n);
 };
 
 

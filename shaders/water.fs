@@ -72,7 +72,7 @@ void main(){
     //Add light
     vec3 viewDir = normalize(viewPos - Position);
     DirLight dirLight_ = dirLight;
-    dirLight_.diffuse = dirLight.diffuse*1.5;
+    dirLight_.diffuse = dirLight.diffuse*2;
     fragcolor = vec4(CalcDirLight(dirLight_, 128.0, Normal, viewDir, color), alpha);
     //fragcolor+=color;
 
