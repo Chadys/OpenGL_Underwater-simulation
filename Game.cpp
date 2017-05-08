@@ -42,6 +42,7 @@ void Game::Init()
     Plane water_surface(glm::vec3(-size/2,-size*0.45,0), glm::vec2(size),
                 ResourceManager::LoadTexture("textures/Water_NormalMap.png", GL_FALSE, GL_TRUE, "water_normals"),
                 ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox"));
+    ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea_outofwater/underwater_", ".png"), "skybox_outside");
     water_surface.Rotation.x=-90;
     planes.push_back(water_surface);
 
@@ -63,6 +64,7 @@ void Game::Init()
 /*------------------------------------UPDATE-----------------------------------------*/
 void Game::Update(GLfloat dt, GLfloat currenttime) {
     static double bubble_count_down = 0;
+    static bool underwater = true;
 
     Shader Mshader = ResourceManager::GetShader("model"),
             Wshader = ResourceManager::GetShader("water"),
@@ -108,6 +110,20 @@ void Game::Update(GLfloat dt, GLfloat currenttime) {
     }
     if(!proba_new_bubble(this->gen)){
         this->add_bubbles(tex_bubble, 1);
+    }
+
+    //change water's skybox if camera break through water
+    if(!underwater) {
+        if (this->Cam.Position.y < 100) {
+            underwater = !underwater;
+            this->State_manager.tex3D = 0;
+            this->planes.front().Reflect = ResourceManager::GetCubemap("skybox");
+        }
+    }
+    else if(this->Cam.Position.y >= 100) {
+        underwater = !underwater;
+        this->State_manager.tex3D = 0;
+        this->planes.front().Reflect = ResourceManager::GetCubemap("skybox_outside");
     }
 }
 
@@ -173,9 +189,13 @@ void Game::Render()
     view3D = this->Cam.GetViewMatrix();
     projection3D = glm::perspective(glm::radians(this->Cam.Zoom), static_cast<GLfloat>(this->Width)/static_cast<GLfloat>(this->Height), 0.1f, 1750.0f);
     projection2D = glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f);
+    bool underwater = this->Cam.Position.y < 100;
 
     //should be drawn at the end but other objects have transparency
-    Renderer[1]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
+    if(underwater)
+        Renderer[1]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
+    else
+        Renderer[1]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox_outside"), projection3D, view3D);
     for(GameModel &mod : this->models) {
         if(!mod.cullface)
             glDisable(GL_CULL_FACE);
@@ -185,12 +205,11 @@ void Game::Render()
         if(!mod.cullface)
             glEnable(GL_CULL_FACE);
     }
-    bool top_of_water = this->Cam.Position.y < 100;
-    if(top_of_water)
+    if(underwater)
         glCullFace(GL_FRONT);
     for(Plane &plane : this->planes)
         plane.Draw(this->State_manager, *Renderer[0], projection3D, view3D);
-    if(top_of_water)
+    if(underwater)
         glCullFace(GL_BACK);
     for(Particle &p : this->bubbles)
         p.Draw(this->State_manager, *Renderer[2], projection3D, view3D);
@@ -243,7 +262,7 @@ void Game::add_models() {
     mod.speed = 20;
     mod.deformation_magnitude = 1.0;
     this->models.push_back(mod);
-    mod = GameModel("models3D/phenix_nocullface/Model_C1018410/fenghuang5.obj", "phenix");
+    mod = GameModel("models3D/phenix/Model_C1018410/fenghuang5.obj", "phenix");
     mod.Size = glm::vec3(0.1);
     mod.centerpoint = glm::vec3(50, 250, 0);
     mod.starting_height = 250;

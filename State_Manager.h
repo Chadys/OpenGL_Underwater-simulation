@@ -25,7 +25,9 @@ enum Active_Shader {
 enum Active_Tex2D {
     NO_TEX,
     WATER_NORMALS,
-    CUBE_BG
+    UNDER_WATER,
+    OUTSIDE,
+    BUBBLE
 };
 
 // Active fading effect
