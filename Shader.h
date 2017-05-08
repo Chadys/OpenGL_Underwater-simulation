@@ -2,8 +2,8 @@
 // Created by julie on 14/02/17.
 //
 
-#ifndef PREPROJET_SHADER_H
-#define PREPROJET_SHADER_H
+#ifndef PROJET_SHADER_H
+#define PROJET_SHADER_H
 
 
 #include <string>
@@ -45,4 +45,4 @@ private:
 };
 
 
-#endif //PREPROJET_SHADER_H
+#endif //PROJET_SHADER_H

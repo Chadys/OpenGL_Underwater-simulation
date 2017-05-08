@@ -2,8 +2,8 @@
 // Created by julie on 13/02/17.
 //
 
-#ifndef PREPROJET_GAME_H
-#define PREPROJET_GAME_H
+#ifndef PROJET_GAME_H
+#define PROJET_GAME_H
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -41,7 +41,8 @@ public:
     void ProcessMouseMovement(GLdouble xpos, GLdouble ypos);
     void ProcessMouseScroll(GLdouble yoffset);
     void Update(GLfloat dt, GLfloat currenttime);
-    void Render();
+    void RenderBuffer();
+    void RenderScreen();
 
 private:
     Camera                   Cam;
@@ -55,6 +56,7 @@ private:
     vector<Text>             texts;
     std::vector<GameModel> 	 models;
     std::mt19937		     gen;
+    POSTPROD_EFFECT          effect;
 
     vector<string>           get_skybox(string path, string ext);
     void                     setConstantShadersUniforms(vector<Shader> &shaders);
@@ -64,4 +66,4 @@ private:
 };
 
 
-#endif //PREPROJET_GAME_H
+#endif //PROJET_GAME_H

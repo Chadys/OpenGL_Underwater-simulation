@@ -5,8 +5,8 @@
 ** Taken and adapted from learnopengl.com (camera tutorial)
 ******************************************************************/
 
-#ifndef PREPROJET_CAMERA_H
-#define PREPROJET_CAMERA_H
+#ifndef PROJET_CAMERA_H
+#define PROJET_CAMERA_H
 
 // Std. Includes
 #include <vector>
@@ -75,4 +75,4 @@ private:
 };
 
 
-#endif //PREPROJET_CAMERA_H
+#endif //PROJET_CAMERA_H

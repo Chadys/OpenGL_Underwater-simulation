@@ -97,11 +97,16 @@ int main (int argc, char *argv[])
         // Update Game state
         game.Update(deltaTime, currentFrame);
 
-        // Render
-        //glClearColor(0.4f, 0.0f, 0.8f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        game.Render();
+        // Render, first pass to framebuffer
+        game.RenderBuffer();
 
+        // Render, second pass to screen
+        glDisable(GL_DEPTH_TEST);
+        game.RenderScreen();
+        glEnable(GL_DEPTH_TEST);
+
+        // Check that no error occurred
+        assert(glGetError() == GL_NO_ERROR);
         // Swap the buffers
         glfwSwapBuffers(window);
     }

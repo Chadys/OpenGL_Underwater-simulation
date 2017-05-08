@@ -2,8 +2,8 @@
 // Created by julie on 04/03/17.
 //
 
-#ifndef PREPROJET_TEXT_H
-#define PREPROJET_TEXT_H
+#ifndef PROJET_TEXT_H
+#define PROJET_TEXT_H
 
 
 #include <GL/glew.h>
@@ -24,4 +24,4 @@ public:
 };
 
 
-#endif //PREPROJET_TEXT_H
+#endif //PROJET_TEXT_H

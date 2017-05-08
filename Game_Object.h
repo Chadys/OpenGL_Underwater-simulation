@@ -2,8 +2,8 @@
 // Created by julie on 13/02/17.
 //
 
-#ifndef PREPROJET_OBJECT_H
-#define PREPROJET_OBJECT_H
+#ifndef PROJET_OBJECT_H
+#define PROJET_OBJECT_H
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -100,4 +100,4 @@ public:
     void Update(GLfloat dt);
 };
 
-#endif //PREPROJET_OBJECT_H
+#endif //PROJET_OBJECT_H

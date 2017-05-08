@@ -4,7 +4,6 @@
 
 #include "Resource_Manager.h"
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 // Instantiate static variables
@@ -12,6 +11,7 @@ std::map<std::string, Texture2D>    ResourceManager::Textures;
 std::map<std::string, Texture3D>    ResourceManager::Cubemaps;
 std::map<std::string, Shader>       ResourceManager::Shaders;
 std::map<std::string, Model>        ResourceManager::Models;
+std::map<std::string, Framebuffer>  ResourceManager::Framebuffers;
 
 
 Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name, std::vector<const GLchar *> common_shaders)
@@ -58,6 +58,17 @@ Model ResourceManager::GetModel(std::string name)
     return Models[name];
 }
 
+Framebuffer ResourceManager::LoadFramebuffer(GLuint width, GLuint height, std::string name) {
+    Framebuffer fb;
+    fb.Generate(width, height);
+    Framebuffers[name] = fb;
+    return Framebuffers[name];
+}
+
+Framebuffer ResourceManager::GetFramebuffer(std::string name) {
+    return Framebuffers[name];
+}
+
 void ResourceManager::Clear()
 {
     // (Properly) delete all shaders
@@ -69,6 +80,9 @@ void ResourceManager::Clear()
     // (Properly) delete all cubemaps
     for (auto iter : Cubemaps)
         glDeleteTextures(1, &iter.second.ID);
+    // (Properly) delete all framebuffers
+    for (auto iter : Framebuffers)
+        glDeleteFramebuffers(1, &iter.second.fbo);
 }
 
 Shader ResourceManager::loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::vector<const GLchar *> common_shaders)
@@ -151,7 +165,7 @@ Texture2D ResourceManager::loadTextureFromFile(const GLchar *file, GLboolean alp
         return texture;
     }
     // Now generate texture
-    texture.Generate(width, height, image);
+    texture.Generate(static_cast<GLuint>(width), static_cast<GLuint>(height), image);
     // And finally free image data
     SOIL_free_image_data(image);
     return texture;
@@ -172,7 +186,7 @@ Texture3D ResourceManager::loadCubemapFromFile(std::vector<std::string> faces)
             std::cout << "ERROR::CUBEMAP_TEXTURE: " << SOIL_last_result() << std::endl;
             return texture;
         }
-        texture.Generate(width,height,image,i);
+        texture.Generate(static_cast<GLuint>(width), static_cast<GLuint>(height),image,i);
         SOIL_free_image_data(image);
     }
     return texture;
@@ -190,6 +204,7 @@ Model ResourceManager::loadModelFromFile(std::string file){
     if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
         std::cout << "ERROR::ASSIMP: " << importer.GetErrorString() << std::endl;
+        return model;
     }
     // Retrieve the directory path of the filepath
     model.directory = file.substr(0, file.find_last_of('/'));

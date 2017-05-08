@@ -2,8 +2,8 @@
 // Created by julie on 04/03/17.
 //
 
-#ifndef PREPROJET_TEXT_RENDERER_H
-#define PREPROJET_TEXT_RENDERER_H
+#ifndef PROJET_TEXT_RENDERER_H
+#define PROJET_TEXT_RENDERER_H
 
 
 #include <map>
@@ -51,4 +51,4 @@ private:
     GLuint VAO, VBO;
 };
 
-#endif //PREPROJET_TEXT_RENDERER_H
+#endif //PROJET_TEXT_RENDERER_H

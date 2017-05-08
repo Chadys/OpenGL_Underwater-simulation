@@ -2,33 +2,15 @@
 // Created by julie on 13/02/17.
 //
 
-#ifndef PREPROJET_STATE_MANAGER_H
-#define PREPROJET_STATE_MANAGER_H
+#ifndef PROJET_STATE_MANAGER_H
+#define PROJET_STATE_MANAGER_H
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "Shader.h"
 #include "Texture.h"
-
-enum Active_Shader {
-    NO_SHADER,
-    WATER,
-    SKYBOX,
-    MODEL,
-    TEXT,
-    DEBUG,
-    PARTICLE
-};
-
-// The different texture possible
-enum Active_Tex2D {
-    NO_TEX,
-    WATER_NORMALS,
-    UNDER_WATER,
-    OUTSIDE,
-    BUBBLE
-};
+#include "Framebuffer.h"
 
 // Active fading effect
 enum Fade_Effect {
@@ -39,17 +21,21 @@ enum Fade_Effect {
 
 class State_Manager{
 public:
-    Active_Shader       shader;
-    Active_Tex2D        tex2D;
+    GLuint              shader;
+    GLuint              tex2D;
     unsigned short      tex3D;
+    GLuint              framebuf;
     GLfloat 	        fade;
     Fade_Effect         Fade;
     State_Manager();
     void Active(Shader &_shader);
     virtual void ActiveTex2D(const Texture2D& texture);
+    virtual void ActiveTex2D(const Framebuffer& framebuf);
     virtual void ActiveTex3D(const Texture3D& texture);
+    virtual void ActiveFramebuf(const Framebuffer& buffer);
+    virtual void DeactiveFramebuf();
     void Update(GLfloat dt);
 };
 
 
-#endif //PREPROJET_STATE_MANAGER_H
+#endif //PROJET_STATE_MANAGER_H

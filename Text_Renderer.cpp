@@ -85,7 +85,7 @@ void Text_Renderer::Load(std::string font, GLuint fontSize)
 
 void Text_Renderer::RenderText(State_Manager &manager, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color)
 {
-    manager.tex2D = NO_TEX;
+    manager.tex2D = 0;
     // Activate corresponding render state
     manager.Active(this->TextShader);
 
@@ -99,7 +99,7 @@ void Text_Renderer::RenderText(State_Manager &manager, std::string text, GLfloat
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++){
         text_size.x += (Characters[*c].Advance >> 6) * scale;
-        GLint height = Characters[*c].Size.y * scale;
+        GLfloat height = Characters[*c].Size.y * scale;
         text_size.y = height > text_size.y ? height : text_size.y;
     }
     text_size *= 0.5f;

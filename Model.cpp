@@ -19,7 +19,7 @@ glm::mat4 Model::Draw(State_Manager &manager, Shader shader, glm::vec3 position,
                  glm::vec3 color, GLfloat alpha, bool outline, bool wings, float deformation_magnitude,
                  GLfloat whirlpooling, glm::vec3 centerpoint, glm::mat4 projection, glm::mat4 view)
 {
-    manager.tex2D = NO_TEX;
+    manager.tex2D = 0;
     manager.Active(shader);
 
     // Prepare transformations

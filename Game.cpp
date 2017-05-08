@@ -5,10 +5,20 @@
 #include "Game.h"
 #include "FogParams.h"
 
+enum SHADER {
+    WATER,
+    SKYBOX,
+    PARTICLE,
+    POSTPROD,
+    MODEL,
+    TEXT,
+    DEBUG
+};
+
 /*------------------------------------CONSTRUCTOR/DESTRUCTOR-----------------------------------------*/
 Game::Game()
         : Keys(), ProcessedKeys(), Cam(glm::vec3(0.0f, 0.0f, 0.0f)), lastX(0), lastY(0),
-          firstMouse(GL_TRUE), DEBUG(GL_FALSE), gen(std::random_device()()) {}
+          firstMouse(GL_TRUE), DEBUG(GL_FALSE), gen(std::random_device()()), effect(NO_POSTPROD) {}
 
 Game::~Game()
 {
@@ -20,43 +30,48 @@ Game::~Game()
 /*------------------------------------INIT-----------------------------------------*/
 void Game::Init()
 {
-    //Adapt camera speed for 2D and depending on the screen size (it was originalled choosen for a 800x600 screen)
-    this->Cam.MovementSpeed = 100.0f*this->Width/800;
+    //Adapt camera speed for 2D and depending on the screen size (it was originally chosen for a 800x600 screen)
+    this->Cam.MovementSpeed = 50.0f*this->Width/800;
 
     // Load shaders
     vector<Shader> shaders;
     shaders.push_back(ResourceManager::LoadShader("./shaders/water.vs", "./shaders/water.fs", nullptr, "water",
-                                                  {"shaders/LIGHT.fs", "shaders/FOG.fs"}));
+                                                  {"./shaders/LIGHT.fs", "./shaders/FOG.fs"}));
     shaders.push_back(ResourceManager::LoadShader("./shaders/skybox.vs", "./shaders/skybox.fs", nullptr, "skybox"));
-    shaders.push_back(ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "shaders/model.gs", "model",
-                                                 {"shaders/LIGHT.fs", "shaders/FOG.fs"}));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/particle.vs", "./shaders/particle.fs", "./shaders/particle.gs", "particle"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor.fs", nullptr, "postprocessor"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/model.vs", "./shaders/model.fs", "./shaders/model.gs", "model",
+                                                 {"./shaders/LIGHT.fs", "./shaders/FOG.fs"}));
     shaders.push_back(ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text"));
-    shaders.push_back(ResourceManager::LoadShader("shaders/debug.vs", "shaders/debug.fs", "shaders/debug.gs", "debug"));
-    shaders.push_back(ResourceManager::LoadShader("shaders/particle.vs", "shaders/particle.fs", "shaders/particle.gs", "particle"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/debug.vs", "./shaders/debug.fs", "./shaders/debug.gs", "debug"));
 
     this->setConstantShadersUniforms(shaders);
 
+    // Load Framebuffer for postprocessing
+    ResourceManager::LoadFramebuffer(this->Width, this->Height, "postprod");
+
     // Load textures
-    // Floor
+    // Water
     GLfloat size(2000);
     Plane water_surface(glm::vec3(-size/2,-size*0.45,0), glm::vec2(size),
-                ResourceManager::LoadTexture("textures/Water_NormalMap.png", GL_FALSE, GL_TRUE, "water_normals"),
+                ResourceManager::LoadTexture("./textures/Water_NormalMap.png", GL_FALSE, GL_TRUE, "water_normals"),
                 ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea/underwater_", ".png"), "skybox"));
     ResourceManager::LoadCubemap(Game::get_skybox("./textures/skybox/hw_deepsea_outofwater/underwater_", ".png"), "skybox_outside");
     water_surface.Rotation.x=-90;
     planes.push_back(water_surface);
 
     // Particle
-    Texture2D bubble_tex = ResourceManager::LoadTexture("textures/bubble.png", GL_TRUE, GL_FALSE, "bubble");
+    Texture2D bubble_tex = ResourceManager::LoadTexture("./textures/bubble.png", GL_TRUE, GL_FALSE, "bubble");
     this->add_bubbles(bubble_tex, 20);
 
     // Models
     this->add_models();
 
     // Set render-specific controls
-    Renderer.push_back(new Sprite_Renderer(shaders[WATER-1], 1.0f));
-    Renderer.push_back(new Sprite_Renderer(shaders[SKYBOX-1]));
-    Renderer.push_back(new Sprite_Renderer(shaders[PARTICLE-1], 0));
+    Renderer.push_back(new Sprite_Renderer(shaders[WATER], 1.0f));
+    Renderer.push_back(new Sprite_Renderer(shaders[SKYBOX]));
+    Renderer.push_back(new Sprite_Renderer(shaders[PARTICLE], 0));
+    Renderer.push_back(new Sprite_Renderer(shaders[POSTPROD], 1.0f));
     T_Renderer = new Text_Renderer(this->Width, this->Height);
     T_Renderer->Load("./fonts/Futura_Bold_Font/a_FuturaOrto-Bold_2258.ttf",50);
 }
@@ -182,20 +197,21 @@ void Game::ProcessMouseScroll(GLdouble yoffset)
 }
 
 /*------------------------------------RENDER-----------------------------------------*/
-void Game::Render()
-{
+void Game::RenderBuffer() {
+    this->State_manager.ActiveFramebuf(ResourceManager::GetFramebuffer("postprod"));
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     // Create camera transformation
-    glm::mat4 view3D, projection3D, projection2D;
+    glm::mat4 view3D, projection3D;
     view3D = this->Cam.GetViewMatrix();
     projection3D = glm::perspective(glm::radians(this->Cam.Zoom), static_cast<GLfloat>(this->Width)/static_cast<GLfloat>(this->Height), 0.1f, 1750.0f);
-    projection2D = glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f);
     bool underwater = this->Cam.Position.y < 100;
 
     //should be drawn at the end but other objects have transparency
     if(underwater)
-        Renderer[1]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
+        Renderer[SKYBOX]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
     else
-        Renderer[1]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox_outside"), projection3D, view3D);
+        Renderer[SKYBOX]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox_outside"), projection3D, view3D);
     for(GameModel &mod : this->models) {
         if(!mod.cullface)
             glDisable(GL_CULL_FACE);
@@ -205,14 +221,23 @@ void Game::Render()
         if(!mod.cullface)
             glEnable(GL_CULL_FACE);
     }
-    if(underwater)
+    //water
+    if(!underwater)
         glCullFace(GL_FRONT);
-    for(Plane &plane : this->planes)
-        plane.Draw(this->State_manager, *Renderer[0], projection3D, view3D);
-    if(underwater)
+    this->planes.front().Draw(this->State_manager, *Renderer[WATER], projection3D, view3D);
+    if(!underwater)
         glCullFace(GL_BACK);
     for(Particle &p : this->bubbles)
-        p.Draw(this->State_manager, *Renderer[2], projection3D, view3D);
+        p.Draw(this->State_manager, *Renderer[PARTICLE], projection3D, view3D);
+}
+
+void Game::RenderScreen() {
+    this->State_manager.DeactiveFramebuf();
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(1,1,1,1);
+
+    //Framebuffer containing whole scene
+    Renderer[POSTPROD]->DrawSprite(this->State_manager, ResourceManager::GetFramebuffer("postprod"), this->effect);
 }
 
 /*------------------------------------MISCELLANOUS-----------------------------------------*/
@@ -232,8 +257,8 @@ vector<string> Game::get_skybox(string path, string ext){
 
 void Game::setConstantShadersUniforms(vector<Shader> &shaders){
     // Configure shaders for value that won't change all throught the program
-    shaders[TEXT-1].SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), GL_TRUE);
-    for (const int i  : {MODEL-1, WATER-1}) {
+    shaders[TEXT].SetMatrix4("projection", glm::ortho(0.0f, static_cast<GLfloat>(this->Width), static_cast<GLfloat>(this->Height), 0.0f, -1.0f, 1.0f), GL_TRUE);
+    for (const int i  : {MODEL, WATER}) {
         shaders[i].SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f, GL_TRUE);
         shaders[i].SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f);
         shaders[i].SetVector3f("dirLight.diffuse", 0.3f, 0.4f, 0.5f);
@@ -259,7 +284,7 @@ void Game::add_models() {
     mod.Size = glm::vec3(0.005);
     mod.Position = glm::vec3(50,0,-50);
     mod.centerpoint = glm::vec3(100, 0, 100);
-    mod.speed = 20;
+    mod.speed = 10;
     mod.deformation_magnitude = 1.0;
     this->models.push_back(mod);
     mod = GameModel("models3D/phenix/Model_C1018410/fenghuang5.obj", "phenix");

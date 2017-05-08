@@ -2,8 +2,8 @@
 // Created by julie on 13/02/17.
 //
 
-#ifndef PREPROJET_TEXTURE_H
-#define PREPROJET_TEXTURE_H
+#ifndef PROJET_TEXTURE_H
+#define PROJET_TEXTURE_H
 
 #include <GL/glew.h>
 
@@ -54,9 +54,9 @@ public:
     // Constructor (sets default texture modes)
     Texture3D();
     // Generates texture from image data
-    void Generate(GLuint width, GLuint height, unsigned char* data, GLuint i);
+    virtual void Generate(GLuint width, GLuint height, unsigned char* data, GLuint i);
     // Binds the texture as the current active GL_TEXTURE_2D texture object
-    void Bind() const;
+    virtual void Bind() const;
 };
 
-#endif //PREPROJET_TEXTURE_H
+#endif //PROJET_TEXTURE_H

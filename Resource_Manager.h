@@ -2,8 +2,8 @@
 // Created by julie on 14/02/17.
 //
 
-#ifndef PREPROJET_RESOURCE_MANAGER_H
-#define PREPROJET_RESOURCE_MANAGER_H
+#ifndef PROJET_RESOURCE_MANAGER_H
+#define PROJET_RESOURCE_MANAGER_H
 
 
 #include <map>
@@ -19,6 +19,7 @@
 #include "Texture.h"
 #include "Shader.h"
 #include "Model.h"
+#include "Framebuffer.h"
 
 
 
@@ -31,10 +32,11 @@ class ResourceManager
 {
 public:
     // Resource storage
-    static std::map<std::string, Shader>     Shaders;
-    static std::map<std::string, Texture2D>  Textures;
-    static std::map<std::string, Texture3D>  Cubemaps;
-    static std::map<std::string, Model>      Models;
+    static std::map<std::string, Shader>           Shaders;
+    static std::map<std::string, Texture2D>        Textures;
+    static std::map<std::string, Texture3D>        Cubemaps;
+    static std::map<std::string, Model>            Models;
+    static std::map<std::string, Framebuffer>      Framebuffers;
 
     // Loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
     static Shader   LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name, std::vector<const GLchar *> common_shaders = {});
@@ -52,6 +54,10 @@ public:
     static Model LoadModel(std::string file, std::string name);
     // Retrieves a stored model
     static Model GetModel(std::string name);
+    // Generate a framebuffer from dimensions
+    static Framebuffer LoadFramebuffer(GLuint width, GLuint height, std::string name);
+    //Retrieves a stored framebuffer
+    static Framebuffer GetFramebuffer(std::string name);
     // Properly de-allocates all loaded resources
     static void Clear();
 private:
@@ -67,4 +73,4 @@ private:
     static Model loadModelFromFile(std::string file);
 };
 
-#endif //PREPROJET_RESOURCE_MANAGER_H
+#endif //PROJET_RESOURCE_MANAGER_H

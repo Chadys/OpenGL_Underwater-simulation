@@ -2,8 +2,8 @@
 // Created by julie on 13/02/17.
 //
 
-#ifndef PREPROJET_SPRITE_RENDERER_H
-#define PREPROJET_SPRITE_RENDERER_H
+#ifndef PROJET_SPRITE_RENDERER_H
+#define PROJET_SPRITE_RENDERER_H
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -15,11 +15,8 @@
 #include "State_Manager.h"
 #include "Camera.h"
 
-enum Effect {
-    NONE,
-    RADIAL_GRAD,
-    V_GRAD,
-    H_GRAD
+enum POSTPROD_EFFECT{
+    NO_POSTPROD
 };
 
 class Sprite_Renderer
@@ -34,6 +31,7 @@ public:
     virtual void DrawSprite(State_Manager &manager, const Texture2D &normals, const Texture3D &skybox, glm::vec3 position, glm::vec2 size = glm::vec2(1.0f), glm::vec3 rotation = glm::vec3(0), glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
     virtual void DrawSprite(State_Manager &manager, const Texture2D &tex, glm::vec3 position, glm::vec2 size, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
     virtual void DrawSprite(State_Manager &manager, const Texture3D &texture, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
+    virtual void DrawSprite(State_Manager &manager, const Framebuffer &framebuf, POSTPROD_EFFECT effect);
 
 private:
     // Render state
@@ -46,4 +44,4 @@ private:
 };
 
 
-#endif //PREPROJET_SPRITE_RENDERER_H
+#endif //PROJET_SPRITE_RENDERER_H
