@@ -43,7 +43,7 @@ uniform float time;
 
 const float pi = 3.14159;
 const float wavelength = 50*pi;
-const float speed = 10.0;
+const float speed = 100.0;
 const vec2 direction = vec2(pi/2, pi);
 const vec3 water_color = vec3(0.037, 0.17, 0.33);
 
