@@ -11,16 +11,23 @@ uniform float sharpen_kernel[9];
 uniform float gauss_kernel[9];
 uniform float sobel_kernel[9];
 uniform float laplacian_kernel[9];
+uniform int width;
+uniform int height;
 
 vec4 apply_filter(float filter_kernel[9], vec4 K[9]);
 vec4 get_bit_reduce(float n_bits, vec4 color);
+vec4 get_mosaic();
+
 const float N_BIT = 3;
+float TILE_V_SIZE = (float(width)/50)/width;
+float TILE_H_SIZE = (float(height)/30)/height;
 
 void main(){
     vec4 K[9];
     for(int i = 0; i < 9; i++){
         K[i] = texture(screenTexture, TexCoords + kernel[i]);
     }
+    vec4 mosaic_col = get_mosaic();
 
     switch(effect){
         case 0: // NO_POSTPROD
@@ -73,6 +80,19 @@ void main(){
         case 14: //BIT_REDUCE
             fragcolor = get_bit_reduce(N_BIT, K[4]);
             break;
+        case 15: //MOSAIC
+            fragcolor = mosaic_col;
+            break;
+//        case 16: //PAINTING
+//            break;
+//        case 17: //HALFTONING
+//            break;
+//        case 18: //SWIRL
+//            break;
+//        case 19: //FISHEYE
+//            break;
+//        case 20: //TIMEWARP
+//            break;
         default:
             fragcolor = K[4];
     }
@@ -95,4 +115,15 @@ vec4 get_bit_reduce(float n_bits, vec4 color){
         color[i] = col;
     }
     return color;
+}
+
+vec4 get_mosaic(){
+    vec2 coord = vec2(0);
+    while(TexCoords.x-coord.x > TILE_V_SIZE/2){
+        coord.x += TILE_V_SIZE;
+    }
+    while(TexCoords.y-coord.y > TILE_H_SIZE/2){
+        coord.y += TILE_H_SIZE;
+    }
+    return texture(screenTexture, coord);
 }

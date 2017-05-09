@@ -19,7 +19,7 @@ namespace PostProd{
         SOBEL,
         LAPLACIAN,
 
-        //Colors transform
+        //Colors modifier
         GREYSCALE,
         INVERT,
         BRIGHT,
@@ -29,6 +29,16 @@ namespace PostProd{
         GREEN_CANAL,
         BLUE_CANAL,
         BIT_REDUCE,
+
+        //Color transform
+        MOSAIC,
+        PAINTING,
+        HALFTONING,
+
+        //Physical transform
+        SWIRL,
+        FISHEYE,
+        TIMEWARP,
         NO_POSTPROD_LAST
     };
 

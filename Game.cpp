@@ -237,7 +237,7 @@ void Game::RenderBuffer() {
 void Game::RenderScreen() {
     this->State_manager.DeactiveFramebuf();
     glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(1,1,1,1);
+    glClearColor(0,0,0,1);
 
     //Framebuffer containing whole scene
     Renderer[POSTPROD]->DrawSprite(this->State_manager, ResourceManager::GetFramebuffer("postprod"), this->effect);
@@ -282,6 +282,8 @@ void Game::setConstantShadersUniforms(vector<Shader> &shaders){
     shaders[POSTPROD].SetFloatArray("gauss_kernel", PostProd::gauss_kernel, 9);
     shaders[POSTPROD].SetFloatArray("sobel_kernel", PostProd::sobel_kernel, 9);
     shaders[POSTPROD].SetFloatArray("laplacian_kernel", PostProd::laplacian_kernel, 9);
+    shaders[POSTPROD].SetInteger("width", this->Width);
+    shaders[POSTPROD].SetInteger("height", this->Height);
 }
 
 void Game::add_models() {
