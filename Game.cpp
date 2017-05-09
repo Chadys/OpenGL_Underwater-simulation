@@ -18,7 +18,7 @@ enum SHADER {
 /*------------------------------------CONSTRUCTOR/DESTRUCTOR-----------------------------------------*/
 Game::Game()
         : Keys(), ProcessedKeys(), Cam(glm::vec3(0.0f, 0.0f, 0.0f)), lastX(0), lastY(0),
-          firstMouse(GL_TRUE), DEBUG(GL_FALSE), gen(std::random_device()()), effect(NO_POSTPROD) {}
+          firstMouse(GL_TRUE), DEBUG(GL_FALSE), gen(std::random_device()()), effect(PostProd::NO_POSTPROD) {}
 
 Game::~Game()
 {
@@ -159,16 +159,19 @@ void Game::ProcessInput(GLfloat dt)
         this->Cam.ProcessKeyboard(FORWARD, dt);
     if(this->Keys[GLFW_KEY_KP_ADD] && !this->ProcessedKeys[GLFW_KEY_KP_ADD]){
         this->ProcessedKeys[GLFW_KEY_KP_ADD] = GL_TRUE;
+        this->effect = static_cast<PostProd::POSTPROD_EFFECT>(this->effect+1);
+        if (this->effect == PostProd::NO_POSTPROD_LAST)
+            this->effect = PostProd::NO_POSTPROD;
     }
     if(this->Keys[GLFW_KEY_KP_SUBTRACT] && !this->ProcessedKeys[GLFW_KEY_KP_SUBTRACT]){
         this->ProcessedKeys[GLFW_KEY_KP_SUBTRACT] = GL_TRUE;
+        if(this->effect > PostProd::NO_POSTPROD)
+            this->effect = static_cast<PostProd::POSTPROD_EFFECT>(this->effect-1);
     }
     //DEBUG
     if(this->Keys[GLFW_KEY_G] && !this->ProcessedKeys[GLFW_KEY_G]){
         this->ProcessedKeys[GLFW_KEY_G] = GL_TRUE;
         this->DEBUG = !this->DEBUG;
-    }
-    if(this->Keys[GLFW_KEY_SPACE] && !this->ProcessedKeys[GLFW_KEY_SPACE]){
     }
 }
 
@@ -272,6 +275,13 @@ void Game::setConstantShadersUniforms(vector<Shader> &shaders){
         else
             shaders[i].SetFloat("fogParams.fDensity", FogParameters::fDensity);
     }
+    //Post processor
+    shaders[POSTPROD].SetVector2fArray("kernel", PostProd::kernel, 9, GL_TRUE);
+    shaders[POSTPROD].SetFloatArray("average_kernel", PostProd::average_kernel, 9);
+    shaders[POSTPROD].SetFloatArray("sharpen_kernel", PostProd::sharpen_kernel, 9);
+    shaders[POSTPROD].SetFloatArray("gauss_kernel", PostProd::gauss_kernel, 9);
+    shaders[POSTPROD].SetFloatArray("sobel_kernel", PostProd::sobel_kernel, 9);
+    shaders[POSTPROD].SetFloatArray("laplacian_kernel", PostProd::laplacian_kernel, 9);
 }
 
 void Game::add_models() {

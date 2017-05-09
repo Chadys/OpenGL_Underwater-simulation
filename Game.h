@@ -45,18 +45,18 @@ public:
     void RenderScreen();
 
 private:
-    Camera                   Cam;
-    GLdouble                 lastX, lastY;
-    bool                     firstMouse;
-    bool                     DEBUG;
-    vector<Sprite_Renderer*> Renderer;
-    Text_Renderer            *T_Renderer;
-    vector<Plane>            planes;
-    vector<Particle>         bubbles;
-    vector<Text>             texts;
-    std::vector<GameModel> 	 models;
-    std::mt19937		     gen;
-    POSTPROD_EFFECT          effect;
+    Camera                      Cam;
+    GLdouble                    lastX, lastY;
+    bool                        firstMouse;
+    bool                        DEBUG;
+    vector<Sprite_Renderer*>    Renderer;
+    Text_Renderer               *T_Renderer;
+    vector<Plane>               planes;
+    vector<Particle>            bubbles;
+    vector<Text>                texts;
+    std::vector<GameModel> 	    models;
+    std::mt19937		        gen;
+    PostProd::POSTPROD_EFFECT   effect;
 
     vector<string>           get_skybox(string path, string ext);
     void                     setConstantShadersUniforms(vector<Shader> &shaders);

@@ -213,7 +213,7 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, const Texture3D &textur
     glDepthFunc(GL_LESS);
 }
 
-void Sprite_Renderer::DrawSprite(State_Manager &manager, const Framebuffer &framebuf, POSTPROD_EFFECT effect){
+void Sprite_Renderer::DrawSprite(State_Manager &manager, const Framebuffer &framebuf, PostProd::POSTPROD_EFFECT effect){
     manager.Active(this->shader);
 
     this->shader.SetInteger("effect", effect);
