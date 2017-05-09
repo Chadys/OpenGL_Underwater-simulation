@@ -17,6 +17,9 @@ uniform int height;
 vec4 apply_filter(float filter_kernel[9], vec4 K[9]);
 vec4 get_bit_reduce(float n_bits, vec4 color);
 vec4 get_mosaic();
+float rand(vec2 co){
+    return fract(sin(dot(co ,vec2(12.9898,78.233))) * 43758.5453);
+}
 
 const float N_BIT = 3;
 float TILE_V_SIZE = (float(width)/50)/width;
@@ -85,8 +88,16 @@ void main(){
             break;
 //        case 16: //PAINTING
 //            break;
-//        case 17: //HALFTONING
-//            break;
+        case 17: //HALFTONING
+            fragcolor = K[4];
+            float r = rand(TexCoords);
+            for(int i = 0; i<3; i++){
+                if(r < fragcolor[i])
+                    fragcolor[i] = 1;
+                else
+                    fragcolor[i] = 0;
+            }
+            break;
 //        case 18: //SWIRL
 //            break;
 //        case 19: //FISHEYE
