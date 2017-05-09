@@ -18,6 +18,17 @@ namespace PostProd{
         GAUSSIAN,
         SOBEL,
         LAPLACIAN,
+
+        //Colors transform
+        GREYSCALE,
+        INVERT,
+        BRIGHT,
+        DARK,
+        THRESHOLD,
+        RED_CANAL,
+        GREEN_CANAL,
+        BLUE_CANAL,
+        BIT_REDUCE,
         NO_POSTPROD_LAST
     };
 
