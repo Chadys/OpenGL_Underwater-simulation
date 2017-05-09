@@ -41,10 +41,10 @@ uniform vec3 viewPos;
 uniform float time;
 
 
-const float pi = 3.14159;
-const float wavelength = 50*pi;
+const float PI = 3.1415926535;
+const float wavelength = 50*PI;
 const float speed = 100.0;
-const vec2 direction = vec2(pi/2, pi);
+const vec2 direction = vec2(PI/2, PI);
 const vec3 water_color = vec3(0.037, 0.17, 0.33);
 
 // Function prototypes
@@ -82,7 +82,7 @@ void main(){
 }
 
 vec3 waveNormal(vec3 pos) {
-    float frequency = 2*pi/wavelength;
+    float frequency = 2*PI/wavelength;
     float phase = speed * frequency;
     float theta = dot(direction, pos.xz);
     float amplitude = 0.5 * direction.x * frequency;

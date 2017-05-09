@@ -282,8 +282,8 @@ void Game::setConstantShadersUniforms(vector<Shader> &shaders){
     shaders[POSTPROD].SetFloatArray("gauss_kernel", PostProd::gauss_kernel, 9);
     shaders[POSTPROD].SetFloatArray("sobel_kernel", PostProd::sobel_kernel, 9);
     shaders[POSTPROD].SetFloatArray("laplacian_kernel", PostProd::laplacian_kernel, 9);
-    shaders[POSTPROD].SetInteger("width", this->Width);
-    shaders[POSTPROD].SetInteger("height", this->Height);
+    shaders[POSTPROD].SetFloat("width", this->Width);
+    shaders[POSTPROD].SetFloat("height", this->Height);
 }
 
 void Game::add_models() {

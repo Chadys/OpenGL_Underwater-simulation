@@ -32,13 +32,16 @@ namespace PostProd{
 
         //Color transform
         MOSAIC,
-        PAINTING,
+        OIL_PAINTING,
+        SKETCH,
         HALFTONING,
 
         //Physical transform
         SWIRL,
         FISHEYE,
         TIMEWARP,
+        KALEIDOSCOPE,
+        KALEIDOSCOPE2,
         NO_POSTPROD_LAST
     };
 
