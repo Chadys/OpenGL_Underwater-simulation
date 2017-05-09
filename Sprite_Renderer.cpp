@@ -225,3 +225,8 @@ void Sprite_Renderer::DrawSprite(State_Manager &manager, const Framebuffer &fram
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
+
+void Sprite_Renderer::SwapShader(Shader &shader_) {
+    if (this->shader.ID != shader_.ID)
+        this->shader = shader_;
+}

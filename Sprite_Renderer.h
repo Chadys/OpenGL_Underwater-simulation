@@ -29,6 +29,7 @@ public:
     virtual void DrawSprite(State_Manager &manager, const Texture2D &tex, glm::vec3 position, glm::vec2 size, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
     virtual void DrawSprite(State_Manager &manager, const Texture3D &texture, glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());
     virtual void DrawSprite(State_Manager &manager, const Framebuffer &framebuf, PostProd::POSTPROD_EFFECT effect);
+    void SwapShader(Shader &shader_);
 
 private:
     // Render state

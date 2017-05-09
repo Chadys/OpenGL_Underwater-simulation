@@ -12,8 +12,19 @@ enum SHADER {
     POSTPROD,
     MODEL,
     TEXT,
-    DEBUG
+    DEBUG,
+    POSTPROD_CONVO,
+    POSTPROD_MOSAIC,
+    POSTPROD_SWIRL,
+    POSTPROD_WARP,
+    POSTPROD_FISHEYE,
+    POSTPROD_KALEI,
+    POSTPROD_KALEI2,
+    POSTPROD_PAINT
 };
+
+std::unordered_set<int> Game::no_neighbor;
+std::unordered_set<int> Game::convolute;
 
 /*------------------------------------CONSTRUCTOR/DESTRUCTOR-----------------------------------------*/
 Game::Game()
@@ -44,6 +55,34 @@ void Game::Init()
                                                  {"./shaders/LIGHT.fs", "./shaders/FOG.fs"}));
     shaders.push_back(ResourceManager::LoadShader("./shaders/text.vs", "./shaders/text.fs", nullptr, "text"));
     shaders.push_back(ResourceManager::LoadShader("./shaders/debug.vs", "./shaders/debug.fs", "./shaders/debug.gs", "debug"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor_convolute.fs", nullptr, "postprocessor_convolute"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor_mosaic.fs", nullptr, "postprocessor_mosaic"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor_swirl.fs", nullptr, "postprocessor_swirl"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor_warp.fs", nullptr, "postprocessor_warp"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor_fisheye.fs", nullptr, "postprocessor_fisheye"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor_kalei.fs", nullptr, "postprocessor_kalei"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor_kalei2.fs", nullptr, "postprocessor_kalei2"));
+    shaders.push_back(ResourceManager::LoadShader("./shaders/postprocessor.vs", "./shaders/postprocessor_oil_painting.fs", nullptr, "postprocessor_oil_painting"));
+
+    //init postprod commmon groups
+    Game::no_neighbor.insert(PostProd::NO_POSTPROD);
+    Game::no_neighbor.insert(PostProd::GREYSCALE);
+    Game::no_neighbor.insert(PostProd::INVERT);
+    Game::no_neighbor.insert(PostProd::BRIGHT);
+    Game::no_neighbor.insert(PostProd::DARK);
+    Game::no_neighbor.insert(PostProd::THRESHOLD);
+    Game::no_neighbor.insert(PostProd::RED_CANAL);
+    Game::no_neighbor.insert(PostProd::GREEN_CANAL);
+    Game::no_neighbor.insert(PostProd::BLUE_CANAL);
+    Game::no_neighbor.insert(PostProd::BIT_REDUCE);
+    Game::no_neighbor.insert(PostProd::HALFTONING);
+
+    Game::convolute.insert(PostProd::AVERAGER);
+    Game::convolute.insert(PostProd::SHARPENER);
+    Game::convolute.insert(PostProd::GAUSSIAN);
+    Game::convolute.insert(PostProd::SOBEL);
+    Game::convolute.insert(PostProd::LAPLACIAN);
+    Game::convolute.insert(PostProd::SKETCH);
 
     this->setConstantShadersUniforms(shaders);
 
@@ -162,11 +201,14 @@ void Game::ProcessInput(GLfloat dt)
         this->effect = static_cast<PostProd::POSTPROD_EFFECT>(this->effect+1);
         if (this->effect == PostProd::NO_POSTPROD_LAST)
             this->effect = PostProd::NO_POSTPROD;
+        this->UpdatePostProd();
     }
     if(this->Keys[GLFW_KEY_KP_SUBTRACT] && !this->ProcessedKeys[GLFW_KEY_KP_SUBTRACT]){
         this->ProcessedKeys[GLFW_KEY_KP_SUBTRACT] = GL_TRUE;
-        if(this->effect > PostProd::NO_POSTPROD)
-            this->effect = static_cast<PostProd::POSTPROD_EFFECT>(this->effect-1);
+        if(this->effect > PostProd::NO_POSTPROD) {
+            this->effect = static_cast<PostProd::POSTPROD_EFFECT>(this->effect - 1);
+            this->UpdatePostProd();
+        }
     }
     //DEBUG
     if(this->Keys[GLFW_KEY_G] && !this->ProcessedKeys[GLFW_KEY_G]){
@@ -212,9 +254,9 @@ void Game::RenderBuffer() {
 
     //should be drawn at the end but other objects have transparency
     if(underwater)
-        Renderer[SKYBOX]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
+        this->Renderer[SKYBOX]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox"), projection3D, view3D);
     else
-        Renderer[SKYBOX]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox_outside"), projection3D, view3D);
+        this->Renderer[SKYBOX]->DrawSprite(this->State_manager, ResourceManager::GetCubemap("skybox_outside"), projection3D, view3D);
     for(GameModel &mod : this->models) {
         if(!mod.cullface)
             glDisable(GL_CULL_FACE);
@@ -227,11 +269,11 @@ void Game::RenderBuffer() {
     //water
     if(!underwater)
         glCullFace(GL_FRONT);
-    this->planes.front().Draw(this->State_manager, *Renderer[WATER], projection3D, view3D);
+    this->planes.front().Draw(this->State_manager, *this->Renderer[WATER], projection3D, view3D);
     if(!underwater)
         glCullFace(GL_BACK);
     for(Particle &p : this->bubbles)
-        p.Draw(this->State_manager, *Renderer[PARTICLE], projection3D, view3D);
+        p.Draw(this->State_manager, *this->Renderer[PARTICLE], projection3D, view3D);
 }
 
 void Game::RenderScreen() {
@@ -240,7 +282,7 @@ void Game::RenderScreen() {
     glClearColor(0,0,0,1);
 
     //Framebuffer containing whole scene
-    Renderer[POSTPROD]->DrawSprite(this->State_manager, ResourceManager::GetFramebuffer("postprod"), this->effect);
+    this->Renderer[POSTPROD]->DrawSprite(this->State_manager, ResourceManager::GetFramebuffer("postprod"), this->effect);
 }
 
 /*------------------------------------MISCELLANOUS-----------------------------------------*/
@@ -276,14 +318,16 @@ void Game::setConstantShadersUniforms(vector<Shader> &shaders){
             shaders[i].SetFloat("fogParams.fDensity", FogParameters::fDensity);
     }
     //Post processor
-    shaders[POSTPROD].SetVector2fArray("kernel", PostProd::kernel, 9, GL_TRUE);
-    shaders[POSTPROD].SetFloatArray("average_kernel", PostProd::average_kernel, 9);
-    shaders[POSTPROD].SetFloatArray("sharpen_kernel", PostProd::sharpen_kernel, 9);
-    shaders[POSTPROD].SetFloatArray("gauss_kernel", PostProd::gauss_kernel, 9);
-    shaders[POSTPROD].SetFloatArray("sobel_kernel", PostProd::sobel_kernel, 9);
-    shaders[POSTPROD].SetFloatArray("laplacian_kernel", PostProd::laplacian_kernel, 9);
-    shaders[POSTPROD].SetFloat("width", this->Width);
-    shaders[POSTPROD].SetFloat("height", this->Height);
+    shaders[POSTPROD_CONVO].SetVector2fArray("kernel", PostProd::kernel, 9, GL_TRUE);
+    shaders[POSTPROD_CONVO].SetFloatArray("average_kernel", PostProd::average_kernel, 9);
+    shaders[POSTPROD_CONVO].SetFloatArray("sharpen_kernel", PostProd::sharpen_kernel, 9);
+    shaders[POSTPROD_CONVO].SetFloatArray("gauss_kernel", PostProd::gauss_kernel, 9);
+    shaders[POSTPROD_CONVO].SetFloatArray("sobel_kernel", PostProd::sobel_kernel, 9);
+    shaders[POSTPROD_CONVO].SetFloatArray("laplacian_kernel", PostProd::laplacian_kernel, 9);
+    for (const int i  : {POSTPROD_MOSAIC, POSTPROD_WARP, POSTPROD_SWIRL, POSTPROD_KALEI, POSTPROD_KALEI2, POSTPROD_PAINT}) {
+        shaders[i].SetFloat("width", this->Width, GL_TRUE);
+        shaders[i].SetFloat("height", this->Height);
+    }
 }
 
 void Game::add_models() {
@@ -378,4 +422,41 @@ void Game::add_trailing_bubbles(Texture2D &tex, GameModel &mod, unsigned int n){
         vel.y += dis(this->gen);
         this->bubbles.emplace_back(pos, glm::vec2(0.5), tex, vel, 0.5);
     }
+}
+
+void Game::UpdatePostProd(){
+    Shader s;
+    if (this->no_neighbor.find(this->effect) != this->no_neighbor.end()){
+        s = ResourceManager::GetShader("postprocessor");
+    } else if (this->convolute.find(this->effect) != this->convolute.end()){
+        s = ResourceManager::GetShader("postprocessor_convolute");
+
+    } else {
+        switch(this->effect){
+            case PostProd::MOSAIC:
+                s = ResourceManager::GetShader("postprocessor_mosaic");
+                break;
+            case PostProd::SWIRL:
+                s = ResourceManager::GetShader("postprocessor_swirl");
+                break;
+            case PostProd::TIMEWARP:
+                s = ResourceManager::GetShader("postprocessor_warp");
+                break;
+            case PostProd::FISHEYE:
+                s = ResourceManager::GetShader("postprocessor_fisheye");
+                break;
+            case PostProd::KALEIDOSCOPE:
+                s = ResourceManager::GetShader("postprocessor_kalei");
+                break;
+            case PostProd::KALEIDOSCOPE2:
+                s = ResourceManager::GetShader("postprocessor_kalei2");
+                break;
+            case PostProd::OIL_PAINTING:
+                s = ResourceManager::GetShader("postprocessor_oil_painting");
+                break;
+            default:
+                s = ResourceManager::GetShader("postprocessor");
+        }
+    }
+    this->Renderer[POSTPROD]->SwapShader(s);
 }
