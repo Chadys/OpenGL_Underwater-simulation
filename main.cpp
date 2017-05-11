@@ -21,11 +21,16 @@
 void sigint_handler(int sig);
 void printFps();
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void simple_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 // Properties
-Game game;
+namespace {
+    static Game game;
+    static bool record = false;
+    static std::fstream prog;
+}
 
 // The MAIN function, from here we start our application and run our Game loop
 int main (int argc, char *argv[])
@@ -50,13 +55,36 @@ int main (int argc, char *argv[])
     glViewport(0, 0, game.Width, game.Height);
     glfwMakeContextCurrent(window);
 
+    // Recording
+    GLfloat prog_time = 0;
+    std::istringstream prog_reader;
+
+    if (argc > 1 && !std::string("record").compare(argv[1])) {
+        record = true;
+        prog.open("./schedule.prg", std::ios::out | std::ios::trunc);
+    }
+    else
+        prog.open("./schedule.prg", std::ios::in);
+    if (!prog.is_open())
+        std::cout << "ERROR::STREAM: Could not open file." << std::endl;
+    else if (!record){
+        std::string line;
+        if (std::getline(prog, line)){ // Read first line of prog
+            prog_reader.str(line);
+            prog_reader >> prog_time; // Get the first word in line (the time)
+        }
+    }
+
 
     // Set the required callback functions
     signal(SIGINT, sigint_handler);
-
-    glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    if(record){
+        glfwSetKeyCallback(window, key_callback);
+        glfwSetCursorPosCallback(window, mouse_callback);
+        glfwSetScrollCallback(window, scroll_callback);
+    }
+    else
+        glfwSetKeyCallback(window, simple_key_callback);
 
     // Options
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -91,6 +119,43 @@ int main (int argc, char *argv[])
         lastFrame = currentFrame;
         glfwPollEvents();
 
+        // Read record
+        if (!record){
+            while (prog_time && prog_time <= currentFrame){
+                char type;
+                if (prog_reader >> type){
+                    switch(type){
+                        case 'k': //Keyboard event
+                            int key, action;
+                            if (prog_reader >> key && prog_reader >> action){
+                                action = action ? GLFW_PRESS : GLFW_RELEASE;
+                                key_callback(window, key, 0, action, 0);
+                            }
+                            break;
+                        case 's': //scroll event
+                            double yoffset;
+                            if (prog_reader >> yoffset)
+                                scroll_callback(window, 0, yoffset);
+                            break;
+                        case 'm': //mouse event
+                            double xpos, ypos;
+                            if (prog_reader >> xpos && prog_reader >> ypos)
+                                mouse_callback(window, xpos, ypos);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                prog_time = 0;
+                std::string line;
+                if (std::getline(prog, line)){
+                    prog_reader.str(line);
+                    prog_reader.clear();
+                    prog_reader >> prog_time;
+                }
+            }
+        }
+
         // Manage user input
         game.ProcessInput(deltaTime);
 
@@ -111,6 +176,8 @@ int main (int argc, char *argv[])
         glfwSwapBuffers(window);
     }
     // Delete all resources as loaded using the resource manager
+    if (prog.is_open())
+        prog.close();
     ResourceManager::Clear();
     glfwTerminate();
     return 0;
@@ -118,9 +185,11 @@ int main (int argc, char *argv[])
 
 
 // Is called whenever a key is pressed/released via GLFW
-void key_callback(GLFWwindow* window, int key, __attribute__((unused)) int scancode, int action, __attribute__((unused)) int mods)
-{
-    //cout << key << endl;
+void simple_key_callback(GLFWwindow* window, int key, __attribute__((unused)) int scancode, int action, __attribute__((unused)) int mods){
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
+}
+void key_callback(GLFWwindow* window, int key, __attribute__((unused)) int scancode, int action, __attribute__((unused)) int mods) {
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
     if (key >= 0 && key < 1024)
@@ -132,17 +201,31 @@ void key_callback(GLFWwindow* window, int key, __attribute__((unused)) int scanc
             game.ProcessedKeys[key] = GL_FALSE;
         }
     }
+    //Write record
+    if (record && prog.is_open()){
+        if (action == GLFW_PRESS)
+            prog << glfwGetTime() << " k " << key << " " << 1 << std::endl;
+        else if(action == GLFW_RELEASE)
+            prog << glfwGetTime() << " k " << key << " " << 0 << std::endl;
+    }
 }
 
 void mouse_callback(__attribute__((unused)) GLFWwindow* window, double xpos, double ypos)
 {
     game.ProcessMouseMovement(xpos, ypos);
+    //Write record
+    if (record && prog.is_open())
+        prog << glfwGetTime() << " m " << xpos << " " << ypos << std::endl;
 }
 
 
 void scroll_callback(__attribute__((unused)) GLFWwindow* window, __attribute__((unused)) double xoffset, double yoffset)
 {
     game.ProcessMouseScroll(yoffset);
+
+    //Write record
+    if (record && prog.is_open())
+        prog << glfwGetTime() << " s " << yoffset << std::endl;
 }
 
 void printFps(void){
@@ -159,6 +242,8 @@ void printFps(void){
 
 
 void sigint_handler(__attribute__((unused)) int sig) {
+    if (prog.is_open())
+        prog.close();
     ResourceManager::Clear();
     glfwTerminate();
     exit(1);
