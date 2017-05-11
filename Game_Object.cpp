@@ -8,8 +8,12 @@
 //-----------------Particle
 float Particle::NO_DECAY = FLT_MAX;
 
-Particle::Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity, float decay)
-        : GameObject(tex), Position(position), Starting_pos(position), Size(size), Velocity(velocity), Decay(decay) { }
+Particle::Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity, float decay,
+                   irrklang::ISoundEngine* engine, const char *audio_path)
+        : GameObject(tex), Position(position), Starting_pos(position), Size(size), Velocity(velocity), Decay(decay) {
+    if(engine != nullptr)
+        engine->play3D(audio_path, irrklang::vec3df(position.x, position.y, position.z));
+}
 
 void Particle::Draw(State_Manager &manager, Sprite_Renderer &renderer, glm::mat4 projection, glm::mat4 view) {
     renderer.DrawSprite(manager, this->Tex, this->Position, this->Size, projection, view);

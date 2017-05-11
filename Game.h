@@ -57,6 +57,7 @@ private:
     vector<Text>                   texts;
     std::vector<GameModel> 	       models;
     std::mt19937		           gen;
+    //postprod effect and set of effect with common shader
     PostProd::POSTPROD_EFFECT      effect;
     static std::unordered_set<int> no_neighbor;
     static std::unordered_set<int> convolute;

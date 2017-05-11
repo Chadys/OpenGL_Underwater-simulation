@@ -12,6 +12,7 @@ std::map<std::string, Texture3D>    ResourceManager::Cubemaps;
 std::map<std::string, Shader>       ResourceManager::Shaders;
 std::map<std::string, Model>        ResourceManager::Models;
 std::map<std::string, Framebuffer>  ResourceManager::Framebuffers;
+irrklang::ISoundEngine *ResourceManager::SoundEngine = irrklang::createIrrKlangDevice();
 
 
 Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name, std::vector<const GLchar *> common_shaders)
@@ -83,6 +84,7 @@ void ResourceManager::Clear()
     // (Properly) delete all framebuffers
     for (auto iter : Framebuffers)
         glDeleteFramebuffers(1, &iter.second.fbo);
+    SoundEngine->drop();
 }
 
 Shader ResourceManager::loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::vector<const GLchar *> common_shaders)

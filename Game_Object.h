@@ -14,6 +14,7 @@
 #include "Sprite_Renderer.h"
 #include "State_Manager.h"
 #include "Model.h"
+#include "irrKlang-64bit-1.5.0/include/ik_ISoundEngine.h"
 
 
 /*------------------------------------INTERFACES-----------------------------------------*/
@@ -73,7 +74,8 @@ public:
     static float NO_DECAY;
 
     // Constructor(s)
-    Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity = glm::vec3(0), float decay = NO_DECAY);
+    Particle(glm::vec3 position, glm::vec2 size, Texture2D tex, glm::vec3 velocity = glm::vec3(0),
+             float decay = NO_DECAY, irrklang::ISoundEngine* engine = nullptr, const char *audio_path = "");
     // Draw sprite
     virtual void Draw(State_Manager &manager, Sprite_Renderer &renderer,
                       glm::mat4 projection = glm::mat4(), glm::mat4 view = glm::mat4());

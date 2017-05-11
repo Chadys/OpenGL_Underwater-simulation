@@ -20,7 +20,7 @@
 #include "Shader.h"
 #include "Model.h"
 #include "Framebuffer.h"
-
+#include "irrKlang-64bit-1.5.0/include/irrKlang.h"
 
 
 // A static singleton ResourceManager class that hosts several
@@ -37,6 +37,7 @@ public:
     static std::map<std::string, Texture3D>        Cubemaps;
     static std::map<std::string, Model>            Models;
     static std::map<std::string, Framebuffer>      Framebuffers;
+    static irrklang::ISoundEngine *SoundEngine;
 
     // Loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
     static Shader   LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name, std::vector<const GLchar *> common_shaders = {});

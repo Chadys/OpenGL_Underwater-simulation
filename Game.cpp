@@ -41,6 +41,10 @@ Game::~Game()
 /*------------------------------------INIT-----------------------------------------*/
 void Game::Init()
 {
+    //Audio
+    if (ResourceManager::SoundEngine != nullptr)
+        ResourceManager::SoundEngine->play2D("./audios/tone_group_-_never_get_out.wav", true);
+
     //Adapt camera speed for 2D and depending on the screen size (it was originally chosen for a 800x600 screen)
     this->Cam.MovementSpeed = 50.0f*this->Width/800;
 
@@ -408,7 +412,8 @@ void Game::add_bubbles(Texture2D &tex, unsigned int n){
         glm::vec3 pos = glm::vec3(this->Cam.Position)+(this->Cam.Front*disZ(this->gen));
         pos.x+=disX(this->gen);
         pos.y -= 200;
-        this->bubbles.emplace_back(pos, glm::vec2(1), tex, glm::vec3(0,10,0));
+        this->bubbles.emplace_back(pos, glm::vec2(1), tex, glm::vec3(0,10,0), Particle::NO_DECAY,
+                                   ResourceManager::SoundEngine, "./audios/Blop-Mark_DiAngelo-79054334.wav");
     }
 }
 
@@ -420,7 +425,8 @@ void Game::add_trailing_bubbles(Texture2D &tex, GameModel &mod, unsigned int n){
         glm::vec3 pos = tmp + glm::vec3(dis(this->gen), dis(this->gen), dis(this->gen));
         glm::vec3 vel = (tmp - glm::vec3(mod.New_true_pos * glm::vec4(mod.Position, 1.0))) * glm::vec3(100);
         vel.y += dis(this->gen);
-        this->bubbles.emplace_back(pos, glm::vec2(0.5), tex, vel, 0.5);
+        this->bubbles.emplace_back(pos, glm::vec2(0.5), tex, vel, 0.5,
+                                   ResourceManager::SoundEngine, "./audios/Blop-Mark_DiAngelo-79054334.wav");
     }
 }
 

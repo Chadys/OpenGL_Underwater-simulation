@@ -75,7 +75,6 @@ int main (int argc, char *argv[])
         }
     }
 
-
     // Set the required callback functions
     signal(SIGINT, sigint_handler);
     if(record){
