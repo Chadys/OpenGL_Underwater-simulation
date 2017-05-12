@@ -1,7 +1,7 @@
 Compilation
 ===
 ```bash
-$cmake CMakeLists.txt
+$cmake .
 $make
 ```
 
@@ -20,10 +20,29 @@ $Under_the_sea
 Dependances
 ===
 - glfw
+```bash
+$sudo apt install libglfw3-dev
+```
 - GLEW
+```bash
+$sudo apt install libglew-dev
+```
 - SOIL
+```bash
+$sudo apt install libsoil-dev
+```
 - assimp
+```bash
+$sudo apt install libassimp-dev
+```
 - Freetype
+```bash
+$sudo apt install libfreetype6-dev
+```
+- GLM
+```bash
+$sudo apt install libglm-dev
+```
 
 Commands guide
 ===
